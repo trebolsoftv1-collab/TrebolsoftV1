@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "trebolsoft"
+version = "0.1.0"
+authors = [
+  { name="trebolsoftv1-collab", email="trebolsoftv1@gmail.com" },
+]
+description = "TrebolSoft API - Sistema de gestión de cobros diarios"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "sqlalchemy>=2.0.36",
+    "alembic>=1.13.2",
+    "python-dotenv>=1.0.1",
+    "psycopg2-binary>=2.9.9",
+    "uvicorn>=0.27.1"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://trebolsoft.com"
+"Repository" = "https://github.com/trebolsoftv1-collab/TrebolsoftV1"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
