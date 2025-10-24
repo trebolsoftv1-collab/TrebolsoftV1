@@ -1,0 +1,42 @@
+name: Staging integration tests
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ staging ]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ secrets.STAGING_BASE_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Wait for staging
+        run: |
+          for i in {1..30}; do
+            status=$(curl -s -o /dev/null -w '%{http_code}' $BASE_URL/health || true)
+            if [ "$status" = "200" ]; then
+              echo "staging ready"
+              break
+            fi
+            echo "waiting for staging... ($i)"
+            sleep 6
+          done
+
+      - name: Run tests
+        run: |
+          pytest -q tests/
