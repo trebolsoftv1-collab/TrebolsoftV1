@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     # Base de datos
     database_url: str
     
+    # Seguridad / JWT
+    secret_key: str = "change-me-in-production"
+    algorithm: str = "HS256"
+    access_token_expires_minutes: int = 30
+    
     # CORS
     cors_allowed_origins: List[str] = [
         "https://trebolsoft.com",
