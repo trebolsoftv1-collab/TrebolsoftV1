@@ -3,6 +3,7 @@ from typing import Optional
 from jose import jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
+import hashlib
 
 from app.core.config import settings
 
@@ -25,10 +26,16 @@ class TokenData(BaseModel):
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
+    # Pre-hash con SHA256 si el password es muy largo
+    if len(plain_password.encode('utf-8')) > 72:
+        plain_password = hashlib.sha256(plain_password.encode('utf-8')).hexdigest()
     return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
+    # Pre-hash con SHA256 si el password es muy largo para bcrypt (>72 bytes)
+    if len(password.encode('utf-8')) > 72:
+        password = hashlib.sha256(password.encode('utf-8')).hexdigest()
     return pwd_context.hash(password)
 
 
