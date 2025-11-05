@@ -6,8 +6,9 @@ from app.core.database import Base, engine
 from app.api.v1 import items_router, users_router, clients_router, credits_router, transactions_router
 from app.api.v1.auth import router as auth_router
 
-# Crear tablas en la base de datos
-Base.metadata.create_all(bind=engine)
+# Nota: La creación de tablas la maneja Alembic vía migraciones en el arranque
+# (ver entrypoint.sh que ejecuta `alembic upgrade head`). Evitamos `create_all`
+# para no interferir con el esquema gestionado por migraciones.
 
 # Crear aplicación FastAPI
 app = FastAPI(
