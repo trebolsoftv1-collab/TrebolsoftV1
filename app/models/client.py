@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Float
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
@@ -15,6 +15,14 @@ class Client(Base):
     email = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     collector_id = Column(Integer, ForeignKey("users.id"))
+    
+    # Geolocalización
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    
+    # Foto de la vivienda
+    house_photo_url = Column(String, nullable=True)
+    
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

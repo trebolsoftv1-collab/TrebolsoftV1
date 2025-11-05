@@ -1,9 +1,10 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, get_current_active_supervisor, get_current_active_admin
+from app.core.cloudinary import upload_client_photo
 from app.models.user import User
 from app.schemas.client import Client, ClientCreate, ClientUpdate
 from app.crud import client as crud_client
@@ -147,3 +148,50 @@ def remove_client(
             detail="Client not found"
         )
     return None
+
+
+@router.post("/{client_id}/upload-photo", response_model=dict)
+async def upload_house_photo(
+    client_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Upload house photo for a client.
+    
+    - Requires authentication (cobrador can upload for their clients, admin/supervisor for any)
+    - Max size: 5MB
+    - Allowed formats: JPEG, PNG, WEBP
+    - Returns the photo URL
+    """
+    # Verificar que el cliente existe
+    db_client = crud_client.get_client(db, client_id)
+    if not db_client:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Client not found"
+        )
+    
+    # Verificar permisos
+    if current_user.role == "collector" and db_client.collector_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only upload photos for your own clients"
+        )
+    
+    # Upload to Cloudinary
+    photo_url = await upload_client_photo(file, client_id)
+    
+    # Update client record with photo URL
+    crud_client.update_client(
+        db,
+        client_id,
+        ClientUpdate(house_photo_url=photo_url)
+    )
+    
+    return {
+        "client_id": client_id,
+        "photo_url": photo_url,
+        "message": "Photo uploaded successfully"
+    }
