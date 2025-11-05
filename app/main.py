@@ -11,6 +11,7 @@ from app.api.v1.auth import router as auth_router
 # para no interferir con el esquema gestionado por migraciones.
 
 # Crear aplicación FastAPI
+# Force rebuild v2 - ensure latest code deployed
 app = FastAPI(
     title=settings.app_name,
     docs_url="/docs",
