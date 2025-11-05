@@ -10,9 +10,16 @@ from alembic import context
 # Agregar el directorio raíz al PYTHONPATH para importar app
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+# Importar settings para inyectar la URL de DB en Alembic
+from app.core.config import settings
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# Forzar que Alembic use la URL de base de datos del entorno (Render)
+if settings.database_url:
+    config.set_main_option("sqlalchemy.url", settings.database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
