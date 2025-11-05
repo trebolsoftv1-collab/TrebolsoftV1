@@ -13,7 +13,8 @@ router = APIRouter()
 def read_items(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_admin)
 ):
     """Lista todos los items."""
     items = db.query(Item).offset(skip).limit(limit).all()
@@ -37,7 +38,8 @@ def create_item(
 @router.get("/items/{item_id}", response_model=ItemSchema)
 def read_item(
     item_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_admin)
 ):
     """Obtiene un item por su ID."""
     if item := db.query(Item).filter(Item.id == item_id).first():
