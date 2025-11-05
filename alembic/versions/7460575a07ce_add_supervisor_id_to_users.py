@@ -28,7 +28,10 @@ def upgrade() -> None:
     columns = [col['name'] for col in inspector.get_columns('users')]
     
     if 'supervisor_id' not in columns:
-        op.add_column('users', sa.Column('supervisor_id', sa.Integer(), sa.ForeignKey('users.id'), nullable=True))
+        # For SQLite, use batch mode to add FK column
+        with op.batch_alter_table('users', schema=None) as batch_op:
+            batch_op.add_column(sa.Column('supervisor_id', sa.Integer(), nullable=True))
+            batch_op.create_foreign_key('fk_users_supervisor', 'users', ['supervisor_id'], ['id'])
 
 
 def downgrade() -> None:
@@ -41,4 +44,7 @@ def downgrade() -> None:
     columns = [col['name'] for col in inspector.get_columns('users')]
     
     if 'supervisor_id' in columns:
-        op.drop_column('users', 'supervisor_id')
+        # For SQLite, use batch mode
+        with op.batch_alter_table('users', schema=None) as batch_op:
+            batch_op.drop_constraint('fk_users_supervisor', type_='foreignkey')
+            batch_op.drop_column('supervisor_id')

@@ -10,15 +10,18 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    supervisor_id: Optional[int] = None
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     full_name: Optional[str] = None
     password: Optional[str] = None
+    supervisor_id: Optional[int] = None
 
 class UserInDBBase(UserBase):
     id: int
     is_active: bool
+    supervisor_id: Optional[int] = None
 
     class Config:
         from_attributes = True
