@@ -2,7 +2,8 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db, get_current_active_admin
+from app.core.database import get_db
+from app.core.dependencies import get_current_active_admin
 from app.models.item import Item
 from app.schemas.item import ItemCreate, ItemUpdate, Item as ItemSchema
 
