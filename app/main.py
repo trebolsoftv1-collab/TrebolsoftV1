@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core import settings
@@ -28,6 +29,11 @@ app.add_middleware(
 )
 
 # Endpoints
+@app.get("/")
+def root():
+    """Redirige al explorador de la API para evitar Not Found en la raíz."""
+    return RedirectResponse(url="/docs")
+
 @app.get("/health")
 def health_check():
     """Endpoint de healthcheck."""
