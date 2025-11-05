@@ -9,7 +9,9 @@ from app.core.security import SECRET_KEY, ALGORITHM, TokenData
 from app.models.user import User, RoleType
 from app.crud.user import get_user_by_username
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+# Importante: usar la ruta absoluta correcta del endpoint de token
+# para que Swagger (/docs) no intente llamar a un path inexistente.
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
 
 def get_db():
     db = SessionLocal()
