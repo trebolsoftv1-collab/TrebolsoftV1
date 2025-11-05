@@ -19,6 +19,7 @@ class Credit(Base):
     amount = Column(Float)
     interest_rate = Column(Float)  # Tasa de interés en porcentaje
     term_days = Column(Integer)    # Plazo en días
+    insurance_amount = Column(Float, default=0.0)  # Seguro asociado al crédito
     daily_payment = Column(Float)  # Pago diario calculado
     total_amount = Column(Float)   # Monto total a pagar
     remaining_amount = Column(Float) # Monto restante por pagar

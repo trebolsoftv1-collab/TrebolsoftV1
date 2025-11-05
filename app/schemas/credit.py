@@ -8,6 +8,7 @@ class CreditBase(BaseModel):
     amount: float
     interest_rate: float
     term_days: int
+    insurance_amount: float | None = 0
 
 class CreditCreate(CreditBase):
     pass
