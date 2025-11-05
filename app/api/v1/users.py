@@ -38,48 +38,25 @@ def list_users(
 def admin_create_user(
     user: UserCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_admin)
 ):
     """Crea usuario con validación jerárquica."""
-    # Admin puede crear cualquier usuario
-    if current_user.role == "admin":
-        # Validar: si crea supervisor/cobrador, puede asignar supervisor
-        # Admin no tiene supervisor
-        if user.role == "admin" and user.supervisor_id is not None:
+    # Solo admin puede crear usuarios
+    # Validar: si crea supervisor/cobrador, puede asignar supervisor
+    if user.role == "admin" and user.supervisor_id is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Admin users cannot have a supervisor"
+        )
+    # Verificar que el supervisor existe
+    if user.supervisor_id is not None:
+        supervisor = crud_user.get_user(db, user.supervisor_id)
+        if not supervisor or supervisor.role not in ["admin", "supervisor"]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Admin users cannot have a supervisor"
+                detail="Invalid supervisor_id"
             )
-        
-        # Verificar que el supervisor existe
-        if user.supervisor_id is not None:
-            supervisor = crud_user.get_user(db, user.supervisor_id)
-            if not supervisor or supervisor.role not in ["admin", "supervisor"]:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Invalid supervisor_id"
-                )
-        
-        return crud_user.create_user(db, user)
-    
-    # Supervisor solo puede crear cobradores bajo su supervisión
-    elif current_user.role == "supervisor":
-        if user.role != "collector":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Supervisors can only create collectors"
-            )
-        
-        # Forzar que el supervisor_id sea el usuario actual
-        user.supervisor_id = current_user.id
-        return crud_user.create_user(db, user)
-    
-    # Cobradores no pueden crear usuarios
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
-        )
+    return crud_user.create_user(db, user)
 
 
 @router.get("/{user_id}", response_model=UserSchema)

@@ -34,25 +34,7 @@ async def login_for_access_token(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/register", response_model=User)
-def register_user(
-    user: UserCreate,
-    db: Session = Depends(get_db)
-):
-    # Verificar si el username ya existe
-    db_user = get_user_by_username(db, user.username)
-    if db_user:
-        raise HTTPException(
-            status_code=400,
-            detail="Username already registered"
-        )
-    
-    # Verificar si el email ya existe
-    db_user_email = get_user_by_email(db, user.email)
-    if db_user_email:
-        raise HTTPException(
-            status_code=400,
-            detail="Email already registered"
-        )
-    
-    return create_user(db=db, user=user)
+@router.post("/register", response_model=User, include_in_schema=False)
+def register_user():
+    """Registro deshabilitado: solo admin puede crear usuarios desde /api/v1/users."""
+    raise HTTPException(status_code=403, detail="Registro público deshabilitado. Solo admin puede crear usuarios.")

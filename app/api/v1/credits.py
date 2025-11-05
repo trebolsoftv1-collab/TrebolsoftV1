@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_user, get_current_active_supervisor
+from app.core.dependencies import get_current_user, get_current_active_supervisor, get_current_active_admin
 from app.models.user import User
 from app.models.credit import CreditStatus
 from app.schemas.credit import Credit, CreditCreate, CreditUpdate
@@ -48,7 +48,7 @@ def list_credits(
 def create_new_credit(
     credit: CreditCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_supervisor)
+    current_user: User = Depends(get_current_active_admin)
 ):
     """Crea un nuevo crédito (solo admin/supervisor)."""
     # Validar que el cliente pertenezca a un collector permitido
@@ -89,7 +89,7 @@ def patch_credit(
     credit_id: int,
     payload: CreditUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_supervisor)
+    current_user: User = Depends(get_current_active_admin)
 ):
     updated = update_credit(db, credit_id, payload)
     if not updated:
@@ -100,7 +100,7 @@ def patch_credit(
 def remove_credit(
     credit_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_supervisor)
+    current_user: User = Depends(get_current_active_admin)
 ):
     ok = delete_credit(db, credit_id)
     if not ok:

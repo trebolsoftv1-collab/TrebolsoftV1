@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, get_current_active_admin
 from app.models.user import User
 from app.schemas.transaction import Transaction, TransactionCreate
 from app.crud.transaction import get_transaction, get_transactions, create_transaction
@@ -32,7 +32,7 @@ def list_transactions(
 def create_new_transaction(
     tx: TransactionCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_admin)
 ):
     # Permisos: cualquier autenticado puede crear, pero si es collector solo dentro de su scope
     # Para supervisor, dentro de sus cobradores y él mismo

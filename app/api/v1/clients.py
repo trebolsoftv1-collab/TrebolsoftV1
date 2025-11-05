@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_user, get_current_active_supervisor
+from app.core.dependencies import get_current_user, get_current_active_supervisor, get_current_active_admin
 from app.models.user import User
 from app.schemas.client import Client, ClientCreate, ClientUpdate
 from app.crud import client as crud_client
@@ -62,7 +62,7 @@ def list_clients(
 def create_new_client(
     client: ClientCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_supervisor)
+    current_user: User = Depends(get_current_active_admin)
 ):
     """Crea un nuevo cliente. Requiere rol supervisor o admin."""
     # Verificar si ya existe un cliente con ese DNI
@@ -121,7 +121,7 @@ def update_existing_client(
     client_id: int,
     client: ClientUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_supervisor)
+    current_user: User = Depends(get_current_active_admin)
 ):
     """Actualiza un cliente. Requiere rol supervisor o admin."""
     updated = crud_client.update_client(db, client_id, client)
@@ -137,7 +137,7 @@ def update_existing_client(
 def remove_client(
     client_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_supervisor)
+    current_user: User = Depends(get_current_active_admin)
 ):
     """Desactiva un cliente (soft delete). Requiere rol supervisor o admin."""
     ok = crud_client.delete_client(db, client_id)

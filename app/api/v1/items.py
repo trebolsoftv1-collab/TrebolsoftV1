@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db
+from app.api.dependencies import get_db, get_current_active_admin
 from app.models.item import Item
 from app.schemas.item import ItemCreate, ItemUpdate, Item as ItemSchema
 
@@ -23,7 +23,8 @@ def read_items(
 @router.post("/items", response_model=ItemSchema, status_code=status.HTTP_201_CREATED)
 def create_item(
     item: ItemCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_admin)
 ):
     """Crea un nuevo item."""
     db_item = Item(**item.model_dump())
@@ -48,7 +49,8 @@ def read_item(
 def update_item(
     item_id: int,
     item: ItemUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_admin)
 ):
     """Actualiza un item."""
     db_item = db.query(Item).filter(Item.id == item_id).first()
@@ -67,7 +69,8 @@ def update_item(
 @router.delete("/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_item(
     item_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_admin)
 ):
     """Elimina un item."""
     db_item = db.query(Item).filter(Item.id == item_id).first()
