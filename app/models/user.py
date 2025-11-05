@@ -21,6 +21,7 @@ class User(Base):
     full_name = Column(String)
     role = Column(Enum(RoleType))
     is_active = Column(Boolean, default=True)
+    supervisor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -28,7 +29,8 @@ class User(Base):
     assigned_clients = relationship("Client", back_populates="collector")
     supervised_collectors = relationship("User", 
                                       backref="supervisor",
-                                      remote_side=[id])
+                                      remote_side=[id],
+                                      foreign_keys=[supervisor_id])
     cash_transactions = relationship("CashTransaction", back_populates="user")
 
     def __repr__(self):

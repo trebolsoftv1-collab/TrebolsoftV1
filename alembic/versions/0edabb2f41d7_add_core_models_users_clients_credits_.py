@@ -47,6 +47,7 @@ def upgrade() -> None:
             sa.Column('full_name', sa.String(), nullable=True),
             sa.Column('role', role_enum, nullable=True),
             sa.Column('is_active', sa.Boolean(), nullable=False, server_default=sa.text('true')),
+            sa.Column('supervisor_id', sa.Integer(), sa.ForeignKey('users.id'), nullable=True),
             sa.Column('created_at', sa.DateTime(), server_default=sa.func.now(), nullable=True),
             sa.Column('updated_at', sa.DateTime(), nullable=True),
         )
