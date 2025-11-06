@@ -8,20 +8,26 @@ class Client(Base):
     __tablename__ = "clients"
 
     id = Column(Integer, primary_key=True, index=True)
-    dni = Column(String, unique=True, index=True)
-    full_name = Column(String)
-    address = Column(String)
-    phone = Column(String)
-    email = Column(String, nullable=True)
+    dni = Column(String, unique=True, index=True)  # Mantenemos DNI por compatibilidad
+    full_name = Column(String)  # Nombre completo
+    
+    # Información de contacto
+    phone = Column(String)  # Celular principal
+    phone2 = Column(String, nullable=True)  # Celular 2 (opcional)
+    email = Column(String, nullable=True)  # Email (opcional)
+    
+    # Información de ubicación
+    city = Column(String)  # Ciudad
+    address = Column(String)  # Dirección
+    latitude = Column(Float, nullable=True)  # Latitud para Google Maps
+    longitude = Column(Float, nullable=True)  # Longitud para Google Maps
+    
+    # Foto de la vivienda (opcional)
+    house_photo_url = Column(String, nullable=True)
+    
+    # Sistema
     is_active = Column(Boolean, default=True)
     collector_id = Column(Integer, ForeignKey("users.id"))
-    
-    # Geolocalización
-    latitude = Column(Float, nullable=True)
-    longitude = Column(Float, nullable=True)
-    
-    # Foto de la vivienda
-    house_photo_url = Column(String, nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -44,9 +44,14 @@ def create_client(db: Session, client: ClientCreate) -> Client:
     db_client = Client(
         dni=client.dni,
         full_name=client.full_name,
-        address=client.address,
         phone=client.phone,
+        phone2=client.phone2,
         email=client.email,
+        city=client.city,
+        address=client.address,
+        latitude=client.latitude,
+        longitude=client.longitude,
+        house_photo_url=client.house_photo_url,
         collector_id=client.collector_id
     )
     db.add(db_client)
