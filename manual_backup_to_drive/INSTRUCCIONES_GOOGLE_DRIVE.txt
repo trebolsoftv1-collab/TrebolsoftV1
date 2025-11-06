@@ -1,0 +1,41 @@
+🛡️ INSTRUCCIONES PARA BACKUP MANUAL A GOOGLE DRIVE
+
+📅 Creado: 2025-11-06 11:41:14
+
+📋 PASOS A SEGUIR CADA SEMANA:
+
+1. 🔄 HACER BACKUP:
+   - Ejecutar: python backup_complete.py
+   - Se creará archivo en: backups/trebolsoft_complete_backup_*.zip
+
+2. 📤 SUBIR A GOOGLE DRIVE:
+   - Abrir: https://drive.google.com (cuenta TrebolSoft)
+   - Ir a carpeta: TrebolSoft-Backups
+   - Arrastrar el archivo .zip más reciente
+   - Verificar que se subió correctamente
+
+3. 🧹 LIMPIAR LOCAL:
+   - Mantener solo 3 backups locales más recientes
+   - Eliminar backups antiguos para ahorrar espacio
+
+📁 ESTRUCTURA EN GOOGLE DRIVE:
+TrebolSoft-Backups/
+├── trebolsoft_complete_backup_20251106_111712.zip
+├── trebolsoft_complete_backup_20251113_020000.zip
+├── trebolsoft_complete_backup_20251120_020000.zip
+└── README.txt (este archivo)
+
+⚠️ IMPORTANTE:
+- NUNCA eliminar todos los backups
+- Mantener al menos 4 backups (1 mes)
+- Verificar que Google Drive tenga espacio suficiente
+- Probar restauración cada 3 meses
+
+🔄 PARA RESTAURAR:
+1. Descargar .zip desde Google Drive
+2. Copiar a: C:\Users\jpancha\TrebolsoftV1/backups/
+3. Ejecutar: python restore_system.py
+4. Seguir instrucciones en pantalla
+
+💡 TIP: Crear recordatorio semanal en tu calendario
+📧 Cuenta recomendada: Gmail de TrebolSoft (NO corporativa)

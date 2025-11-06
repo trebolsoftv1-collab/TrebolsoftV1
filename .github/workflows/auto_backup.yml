@@ -1,0 +1,145 @@
+name: 🛡️ Backup Automático TrebolSoft
+
+# Ejecutar cada domingo a las 2:00 AM UTC (ideal para México)
+on:
+  schedule:
+    - cron: '0 2 * * 0'  # Domingos 2:00 AM UTC
+  workflow_dispatch:  # Permite ejecutar manualmente
+
+jobs:
+  backup_database:
+    name: 📦 Crear Backup de Base de Datos
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: 📦 Install Dependencies
+      run: |
+        pip install requests psycopg2-binary sqlalchemy alembic
+        
+    - name: 🗄️ Download Database from Render
+      env:
+        RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: |
+        echo "🔗 Conectando a base de datos en Render..."
+        
+        # Crear script para backup de DB
+        cat > backup_db.py << 'EOF'
+        import os
+        import zipfile
+        import datetime
+        import subprocess
+        from pathlib import Path
+        
+        # Crear backup de la base de datos
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_name = f"trebolsoft_db_backup_{timestamp}"
+        
+        print(f"📊 Creando backup: {backup_name}")
+        
+        # Si es PostgreSQL, usar pg_dump
+        database_url = os.getenv('DATABASE_URL')
+        if database_url and 'postgresql' in database_url:
+            # Backup PostgreSQL
+            dump_file = f"{backup_name}.sql"
+            result = subprocess.run([
+                'pg_dump', database_url, '-f', dump_file
+            ], capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                print(f"✅ PostgreSQL dump creado: {dump_file}")
+                
+                # Comprimir
+                with zipfile.ZipFile(f"{backup_name}.zip", 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    zipf.write(dump_file, dump_file)
+                    
+                    # Agregar manifiesto
+                    manifest = {
+                        "backup_date": datetime.datetime.now().isoformat(),
+                        "backup_type": "database_only",
+                        "database_type": "postgresql",
+                        "source": "github_actions"
+                    }
+                    
+                    import json
+                    zipf.writestr("BACKUP_MANIFEST.json", json.dumps(manifest, indent=2))
+                    
+                print(f"📦 Backup comprimido: {backup_name}.zip")
+                
+                # Establecer variable de entorno para el siguiente paso
+                with open(os.environ['GITHUB_ENV'], 'a') as env_file:
+                    env_file.write(f"BACKUP_FILE={backup_name}.zip\n")
+                    
+            else:
+                print(f"❌ Error en pg_dump: {result.stderr}")
+                exit(1)
+        else:
+            print("⚠️ No hay conexión a PostgreSQL configurada")
+            exit(1)
+        EOF
+        
+        python backup_db.py
+        
+    - name: 📤 Upload to GitHub Releases
+      if: success()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Obtener información del backup
+        BACKUP_FILE="${{ env.BACKUP_FILE }}"
+        TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+        TAG_NAME="auto-backup-${TIMESTAMP}"
+        
+        echo "📤 Subiendo backup: ${BACKUP_FILE}"
+        
+        # Crear release
+        gh release create "${TAG_NAME}" \
+          --title "🛡️ Backup Automático ${TIMESTAMP}" \
+          --notes "Backup automático de base de datos generado el $(date)" \
+          --prerelease \
+          "${BACKUP_FILE}"
+          
+        echo "✅ Backup subido a: https://github.com/${{ github.repository }}/releases/tag/${TAG_NAME}"
+        
+    - name: 🧹 Cleanup Old Releases
+      if: success()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "🧹 Limpiando backups antiguos..."
+        
+        # Obtener releases de backup automático
+        gh release list --limit 50 | grep "auto-backup-" | tail -n +8 | while read line; do
+          tag=$(echo "$line" | awk '{print $1}')
+          echo "🗑️ Eliminando release antiguo: $tag"
+          gh release delete "$tag" --yes
+        done
+        
+        echo "✅ Limpieza completada (mantenidos últimos 7 backups)"
+        
+    - name: 📧 Send Notification
+      if: always()
+      env:
+        WEBHOOK_URL: ${{ secrets.BACKUP_WEBHOOK_URL }}
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          MESSAGE="✅ Backup automático completado exitosamente - $(date)"
+        else
+          MESSAGE="❌ Error en backup automático - $(date)"
+        fi
+        
+        if [ -n "$WEBHOOK_URL" ]; then
+          curl -X POST "$WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "{\"text\": \"$MESSAGE\"}"
+        fi
+        
+        echo "$MESSAGE"

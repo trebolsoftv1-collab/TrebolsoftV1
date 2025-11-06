@@ -1,0 +1,20 @@
+{
+  "backup_date": "2025-11-06T11:17:12.866123",
+  "backup_type": "complete_system",
+  "application": "TrebolSoft",
+  "version": "1.0",
+  "contents": {
+    "database": "Base de datos SQLite completa",
+    "configuration": "Archivos de configuración y variables de entorno",
+    "application_code": "Código fuente completo",
+    "git_info": "Estado del repositorio Git"
+  },
+  "restoration_notes": [
+    "1. Restaurar archivos de configuración",
+    "2. Restaurar base de datos dev.db",
+    "3. Restaurar código de aplicación",
+    "4. Instalar dependencias: pip install -r requirements.txt",
+    "5. Ejecutar migraciones: alembic upgrade head",
+    "6. Iniciar aplicación: uvicorn app.main:app --reload"
+  ]
+}
