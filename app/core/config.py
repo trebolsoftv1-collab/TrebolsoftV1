@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     # CORS
     cors_allowed_origins: List[str] = [
         "https://trebolsoft.com",
+        "https://app.trebolsoft.com",
         "https://api.trebolsoft.com",
         "http://localhost:8000",
         "http://localhost:3000"
