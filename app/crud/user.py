@@ -28,6 +28,8 @@ def create_user(db: Session, user: UserCreate) -> User:
         username=user.username,
         hashed_password=hashed_password,
         full_name=user.full_name,
+        phone=user.phone,
+        zone=user.zone,
         role=user.role,
         supervisor_id=user.supervisor_id
     )

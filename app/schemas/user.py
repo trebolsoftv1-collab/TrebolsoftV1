@@ -6,6 +6,8 @@ class UserBase(BaseModel):
     email: EmailStr
     username: str
     full_name: str
+    phone: Optional[str] = None
+    zone: Optional[str] = None
     role: RoleType
 
 class UserCreate(UserBase):
@@ -15,12 +17,16 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     full_name: Optional[str] = None
+    phone: Optional[str] = None
+    zone: Optional[str] = None
     password: Optional[str] = None
     supervisor_id: Optional[int] = None
 
 class UserInDBBase(UserBase):
     id: int
     is_active: bool
+    phone: Optional[str] = None
+    zone: Optional[str] = None
     supervisor_id: Optional[int] = None
 
     class Config:

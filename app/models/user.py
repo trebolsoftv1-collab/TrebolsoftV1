@@ -19,6 +19,8 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     full_name = Column(String)
+    phone = Column(String, nullable=True)  # Nuevo campo para celular
+    zone = Column(String, nullable=True)   # Nuevo campo para zona asignada
     role = Column(Enum(RoleType))
     is_active = Column(Boolean, default=True)
     supervisor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
