@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Union
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,14 +21,17 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expires_minutes: int = 30
     
-    # CORS
-    cors_allowed_origins: List[str] = [
-        "https://trebolsoft.com",
-        "https://app.trebolsoft.com",
-        "https://api.trebolsoft.com",
-        "http://localhost:8000",
-        "http://localhost:3000"
-    ]
+    # CORS - acepta string separado por comas o lista JSON
+    cors_allowed_origins: Union[List[str], str] = "https://trebolsoft.com,https://app.trebolsoft.com,https://api.trebolsoft.com,http://localhost:8000,http://localhost:3000"
+    
+    @field_validator('cors_allowed_origins', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        """Parsea CORS origins desde string separado por comas o lista JSON"""
+        if isinstance(v, str):
+            # Si es string, dividir por comas y limpiar espacios
+            return [origin.strip() for origin in v.split(',') if origin.strip()]
+        return v
     
     model_config = SettingsConfigDict(
         env_file=".env",
