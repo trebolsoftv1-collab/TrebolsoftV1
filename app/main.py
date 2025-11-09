@@ -1,11 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from app.core import settings
-from app.core.database import Base, engine
+from app.core.database import Base, engine, SessionLocal
 from app.api.v1 import items_router, users_router, clients_router, credits_router, transactions_router
 from app.api.v1.auth import router as auth_router
+from app.models.user import User, RoleType
+from app.core.security import get_password_hash
 
 # Nota: La creación de tablas la maneja Alembic vía migraciones en el arranque
 # (ver entrypoint.sh que ejecuta `alembic upgrade head`). Evitamos `create_all`
@@ -47,6 +50,40 @@ def root():
 def health_check():
     """Endpoint de healthcheck."""
     return {"status": "ok"}
+
+# Endpoint temporal de setup - ELIMINAR después de usar
+class SetupAdmin(BaseModel):
+    username: str = "admin"
+    password: str = "Admin123!"
+    email: str = "admin@trebolsoft.com"
+    full_name: str = "Administrador"
+
+@app.post("/setup-admin")
+def setup_admin(data: SetupAdmin):
+    """Endpoint temporal para crear admin - Solo funciona si no existe"""
+    db = SessionLocal()
+    try:
+        # Verificar si ya existe
+        existing = db.query(User).filter(User.username == data.username).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Admin already exists")
+        
+        # Crear admin
+        admin = User(
+            username=data.username,
+            email=data.email,
+            full_name=data.full_name,
+            phone="0000000000",
+            zone="Todas",
+            role=RoleType.ADMIN,
+            is_active=True,
+            hashed_password=get_password_hash(data.password)
+        )
+        db.add(admin)
+        db.commit()
+        return {"message": "Admin created successfully", "username": data.username}
+    finally:
+        db.close()
 
 # Incluir rutas de la API v1
 app.include_router(items_router, prefix="/api/v1")
