@@ -12,11 +12,15 @@ from app.api.v1.auth import router as auth_router
 # para no interferir con el esquema gestionado por migraciones.
 
 # Crear aplicación FastAPI
-# Force rebuild v4 - fix CORS settings instance
+# Force rebuild v5 - disable docs in production for security
+# Solo habilitar documentación en desarrollo
+docs_url = "/docs" if settings.app_env != "production" else None
+redoc_url = "/redoc" if settings.app_env != "production" else None
+
 app = FastAPI(
     title=settings.app_name,
-    docs_url="/docs",
-    redoc_url="/redoc"
+    docs_url=docs_url,
+    redoc_url=redoc_url
 )
 
 # Configurar CORS
@@ -31,8 +35,13 @@ app.add_middleware(
 # Endpoints
 @app.get("/")
 def root():
-    """Redirige al explorador de la API para evitar Not Found en la raíz."""
-    return RedirectResponse(url="/docs")
+    """Endpoint raíz de la API."""
+    return {
+        "message": "TrebolSoft API",
+        "version": "1.0",
+        "status": "online",
+        "docs": "/docs" if settings.app_env != "production" else "disabled in production"
+    }
 
 @app.get("/health")
 def health_check():
