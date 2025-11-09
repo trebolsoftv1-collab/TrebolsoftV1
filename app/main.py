@@ -60,15 +60,21 @@ class SetupAdmin(BaseModel):
 
 @app.post("/setup-admin")
 def setup_admin(data: SetupAdmin):
-    """Endpoint temporal para crear admin - Solo funciona si no existe"""
+    """Endpoint temporal para crear/actualizar admin"""
     db = SessionLocal()
     try:
         # Verificar si ya existe
         existing = db.query(User).filter(User.username == data.username).first()
         if existing:
-            raise HTTPException(status_code=400, detail="Admin already exists")
+            # Actualizar contraseña del admin existente
+            existing.hashed_password = get_password_hash(data.password)
+            existing.email = data.email
+            existing.full_name = data.full_name
+            existing.is_active = True
+            db.commit()
+            return {"message": "Admin password updated successfully", "username": data.username}
         
-        # Crear admin
+        # Crear admin nuevo
         admin = User(
             username=data.username,
             email=data.email,
