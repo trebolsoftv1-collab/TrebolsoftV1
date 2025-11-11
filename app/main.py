@@ -7,6 +7,7 @@ from app.core import settings
 from app.core.database import Base, engine, SessionLocal
 from app.api.v1 import items_router, users_router, clients_router, credits_router, transactions_router
 from app.api.v1.auth import router as auth_router
+from app.api.v1.stats import router as stats_router
 from app.models.user import User, RoleType
 from app.core.security import get_password_hash
 
@@ -99,3 +100,4 @@ app.include_router(users_router, prefix="/api/v1/users", tags=["users"])
 app.include_router(clients_router, prefix="/api/v1/clients", tags=["clients"])
 app.include_router(credits_router, prefix="/api/v1/credits", tags=["credits"])
 app.include_router(transactions_router, prefix="/api/v1/transactions", tags=["transactions"])
+app.include_router(stats_router, prefix="/api/v1/stats", tags=["stats"])
