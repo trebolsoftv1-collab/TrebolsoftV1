@@ -12,8 +12,8 @@ class ClientBase(BaseModel):
     email: Optional[EmailStr] = None  # Email (opcional)
     
     # Información de ubicación
-    city: str  # Ciudad (requerido)
-    address: str  # Dirección (requerido)
+    city: Optional[str] = None  # Ciudad (opcional - puede ser None en BD)
+    address: Optional[str] = None  # Dirección (opcional - puede ser None en BD)
     latitude: Optional[float] = None  # Latitud para Google Maps
     longitude: Optional[float] = None  # Longitud para Google Maps
     
