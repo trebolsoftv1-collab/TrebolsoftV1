@@ -2,8 +2,8 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+  POSTGRES_USER: trebolsoft
+  POSTGRES_PASSWORD: Porquesi2025*
       POSTGRES_DB: trebolsoft
     ports:
       - "5432:5432"
@@ -15,7 +15,7 @@ services:
     environment:
       APP_ENV: local
       APP_NAME: TrebolSoft API
-      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/trebolsoft
+  DATABASE_URL: postgresql+psycopg2://trebolsoft:Porquesi2025*@db:5432/trebolsoft
       CORS_ALLOWED_ORIGINS: http://localhost:8000,http://localhost:3000
       # Cloudinary credentials (optional for local dev, use .env file or set here)
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}

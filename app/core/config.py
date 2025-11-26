@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     
     # CORS - acepta string separado por comas o lista JSON
     cors_allowed_origins: Union[List[str], str] = "https://trebolsoft.com,https://app.trebolsoft.com,https://api.trebolsoft.com,http://localhost:8000,http://localhost:3000"
+
+    # Cloudinary
+    cloudinary_cloud_name: str = ""
+    cloudinary_api_key: str = ""
+    cloudinary_api_secret: str = ""
     
     @field_validator('cors_allowed_origins', mode='before')
     @classmethod
