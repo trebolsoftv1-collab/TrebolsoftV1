@@ -25,13 +25,7 @@ def upgrade() -> None:
     existing_tables = set(inspector.get_table_names())
 
     # Enums (PostgreSQL): crear tipos ENUM si no existen
-    if bind.dialect.name == 'postgresql':
-    pass
-
-       # Verificar y crear ENUMs solo si no existen
-       # op.execute(sa.text("DO $$ BEGIN CREATE TYPE roletype AS ENUM ('admin', 'supervisor', 'collector'); EXCEPTION WHEN duplicate_object THEN null; END $$;"))
-       #op.execute(sa.text("DO $$ BEGIN CREATE TYPE creditstatus AS ENUM ('active', 'completed', 'defaulted'); EXCEPTION WHEN duplicate_object THEN null; END $$;"))
-       #op.execute(sa.text("DO $$ BEGIN CREATE TYPE transactiontype AS ENUM ('payment', 'disbursement', 'deposit', 'withdrawal'); EXCEPTION WHEN duplicate_object THEN null; END $$;"))
+    # (Bloque eliminado para evitar errores de indentación)
 
     # Definir enums para uso en create_table
     role_enum = sa.Enum('admin', 'supervisor', 'collector', name='roletype', create_type=True)
