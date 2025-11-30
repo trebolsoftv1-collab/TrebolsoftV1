@@ -26,15 +26,17 @@ def upgrade() -> None:
 
     # Enums (PostgreSQL): crear tipos ENUM si no existen
     if bind.dialect.name == 'postgresql':
-        # Verificar y crear ENUMs solo si no existen
-        op.execute(sa.text("DO $$ BEGIN CREATE TYPE roletype AS ENUM ('admin', 'supervisor', 'collector'); EXCEPTION WHEN duplicate_object THEN null; END $$;"))
-        op.execute(sa.text("DO $$ BEGIN CREATE TYPE creditstatus AS ENUM ('active', 'completed', 'defaulted'); EXCEPTION WHEN duplicate_object THEN null; END $$;"))
-        op.execute(sa.text("DO $$ BEGIN CREATE TYPE transactiontype AS ENUM ('payment', 'disbursement', 'deposit', 'withdrawal'); EXCEPTION WHEN duplicate_object THEN null; END $$;"))
-    
+    pass
+
+       # Verificar y crear ENUMs solo si no existen
+       # op.execute(sa.text("DO $$ BEGIN CREATE TYPE roletype AS ENUM ('admin', 'supervisor', 'collector'); EXCEPTION WHEN duplicate_object THEN null; END $$;"))
+       #op.execute(sa.text("DO $$ BEGIN CREATE TYPE creditstatus AS ENUM ('active', 'completed', 'defaulted'); EXCEPTION WHEN duplicate_object THEN null; END $$;"))
+       #op.execute(sa.text("DO $$ BEGIN CREATE TYPE transactiontype AS ENUM ('payment', 'disbursement', 'deposit', 'withdrawal'); EXCEPTION WHEN duplicate_object THEN null; END $$;"))
+
     # Definir enums para uso en create_table
-    role_enum = sa.Enum('admin', 'supervisor', 'collector', name='roletype', create_type=False)
-    credit_status_enum = sa.Enum('active', 'completed', 'defaulted', name='creditstatus', create_type=False)
-    tx_type_enum = sa.Enum('payment', 'disbursement', 'deposit', 'withdrawal', name='transactiontype', create_type=False)
+    role_enum = sa.Enum('admin', 'supervisor', 'collector', name='roletype', create_type=True)
+    credit_status_enum = sa.Enum('active', 'completed', 'defaulted', name='creditstatus', create_type=True)
+    tx_type_enum = sa.Enum('payment', 'disbursement', 'deposit', 'withdrawal', name='transactiontype', create_type=True)
 
     # users
     if 'users' not in existing_tables:
