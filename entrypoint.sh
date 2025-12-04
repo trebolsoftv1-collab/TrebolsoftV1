@@ -1,9 +1,10 @@
 #!/usr/bin/env sh
 set -e
 while IFS='=' read -r key value; do
-	if [ -n "$key" ] && [ "${key:0:1}" != "#" ]; then
-		export "$key"="$value"
-	fi
+	case "$key" in
+		''|\#*) ;; # ignora líneas vacías o que empiezan con #
+		*) export "$key"="$value" ;;
+	esac
 done < /app/.env
 export PORT="${PORT:-10000}"
 # Migraciones
