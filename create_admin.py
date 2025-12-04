@@ -17,7 +17,7 @@ def create_admin():
     db = SessionLocal()
     try:
         # Verificar si ya existe un admin
-        existing_admin = db.query(User).filter(User.role == RoleType.ADMIN).first()
+        existing_admin = db.query(User).filter(User.role == 'admin').first()
         if existing_admin:
             print(f"✅ Ya existe un administrador: {existing_admin.username}")
             print(f"   Email: {existing_admin.email}")
@@ -31,7 +31,7 @@ def create_admin():
             "full_name": "Administrador",
             "phone": "0000000000",
             "zone": "Todas",
-            "role": RoleType.ADMIN,
+                "role": 'admin',  # RoleType.ADMIN ahora es 'admin' en minúsculas
             "is_active": True,
             "hashed_password": get_password_hash("admin123"),  # Cambiar después del primer login
             "supervisor_id": None
