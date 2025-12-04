@@ -53,7 +53,8 @@ def create_admin():
         print(f"   Role: {admin_user.role}")
         print(f"\n⚠️  IMPORTANTE: Cambia la contraseña después del primer login")
         print(f"\n🌐 Puedes usar estas credenciales en:")
-        print(f"   - https://app.trebolsoft.com")
+        print(f"   - https://www.trebolsoft.com")
+        print(f"   - https://trebolsoft.com")
         print(f"   - http://localhost:8000/docs")
         print("="*60)
         
