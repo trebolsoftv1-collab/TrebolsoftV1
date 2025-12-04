@@ -7,7 +7,10 @@ while IFS='=' read -r key value; do
 	fi
 done < /app/.env
 export PORT="${PORT:-10000}"
-# Migraciones
-alembic upgrade head
+# Debug: mostrar variables de entorno
+echo "Variables de entorno cargadas:"
+env
+# Migraciones (comentado para prueba)
+# alembic upgrade head
 # Arranque
 exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT}
