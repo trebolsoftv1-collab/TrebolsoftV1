@@ -28,6 +28,7 @@ app = FastAPI(
 )
 
 # Configurar CORS
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_allowed_origins,
@@ -35,6 +36,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+print("CORS_ALLOWED_ORIGINS:", settings.cors_allowed_origins)
 
 # Endpoints
 @app.get("/")
