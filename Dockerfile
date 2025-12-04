@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 COPY .env /app/.env
 RUN cat /app/.env
+COPY wait-for-it.sh /app/wait-for-it.sh
 
 RUN chmod +x /app/entrypoint.sh
 
