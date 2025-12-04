@@ -13,6 +13,7 @@ COPY . .
 COPY .env /app/.env
 RUN cat /app/.env
 COPY wait-for-it.sh /app/wait-for-it.sh
+RUN chmod +x /app/wait-for-it.sh
 
 RUN chmod +x /app/entrypoint.sh
 
