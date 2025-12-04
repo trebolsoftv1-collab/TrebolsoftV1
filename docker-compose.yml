@@ -4,7 +4,7 @@ services:
     image: postgres:16
     environment:
       POSTGRES_USER: trebolsoft
-        POSTGRES_PASSWORD: Porquesi2025
+      POSTGRES_PASSWORD: Porquesi2025
       POSTGRES_DB: trebolsoft
     ports:
       - "5432:5432"
