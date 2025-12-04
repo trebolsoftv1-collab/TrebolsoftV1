@@ -106,65 +106,51 @@ docker compose up --build
 - **API**: http://localhost:10000
 - **DB**: localhost:5432 (postgres/postgres)
 
-## 📦 Despliegue en Render
 
-### Paso 1: Crear base de datos PostgreSQL
-1. En Render Dashboard: **New +** → **PostgreSQL**
-2. Configurar:
-   - Name: `trebolsoft-db`
-   - Database: `trebolsoft`
-   - Region: Selecciona la más cercana
-   - Plan: **Starter (Free)**
-3. Crear database
-4. **Guardar la Internal Database URL** (la necesitarás después)
+## 📦 Despliegue en DigitalOcean
 
-### Paso 2: Crear servicio web
-1. En Render Dashboard: **New +** → **Web Service**
-2. Conectar tu repositorio de GitHub: `trebolsoftv1-collab/TrebolsoftV1`
-3. Configurar:
-   - **Name**: `trebolsoft-api`
-   - **Environment**: Docker
-   - **Branch**: `main`
-   - **Plan**: Free
+### Paso 1: Crear Droplet en DigitalOcean
+1. Accede a DigitalOcean y crea un Droplet (Ubuntu recomendado).
+2. Configura la IP pública: `164.90.145.189`.
+3. Instala Docker y docker-compose en el servidor.
 
-### Paso 3: Configurar variables de entorno
-En la sección **Environment** del servicio, agregar:
+### Paso 2: Configurar base de datos PostgreSQL
+1. Puedes usar un contenedor Docker para PostgreSQL o un servicio gestionado.
+2. Configura las variables de entorno en `.env` y `docker-compose.yml` para apuntar a la IP del servidor o al contenedor `db`.
 
-| Key | Value |
-|-----|-------|
-| `APP_ENV` | `production` |
-| `DATABASE_URL` | `postgresql+psycopg2://[internal-db-url]` |
-| `SECRET_KEY` | `[clave-generada-con-secrets.token_hex(32)]` |
-| `ALGORITHM` | `HS256` |
-| `ACCESS_TOKEN_EXPIRES_MINUTES` | `30` |
-| `CORS_ALLOWED_ORIGINS` | `["https://trebolsoft.com","https://api.trebolsoft.com"]` |
+### Paso 3: Subir el código al servidor
+1. Clona el repositorio en el Droplet:
+  ```bash
+  git clone https://github.com/trebolsoftv1-collab/TrebolsoftV1.git
+  cd TrebolsoftV1
+  ```
+2. Configura las variables de entorno en `.env`.
 
-⚠️ **IMPORTANTE**: Asegúrate de que `DATABASE_URL` tenga el formato `postgresql+psycopg2://` (no solo `postgresql://`)
+### Paso 4: Construir y levantar los servicios
+1. Ejecuta:
+  ```bash
+  docker compose up --build -d
+  ```
+2. El `entrypoint.sh` ejecutará las migraciones antes de iniciar la API.
 
-### Paso 4: Deploy
-1. Render detectará el `Dockerfile` automáticamente
-2. El `entrypoint.sh` ejecutará las migraciones antes de iniciar
-3. Espera 2-5 minutos para el primer deploy
-4. Verifica en **Logs** que no haya errores
+### Paso 5: Configurar DNS en Cloudflare
+1. En Cloudflare, apunta los registros A de `trebolsoft.com`, `www.trebolsoft.com` y `api.trebolsoft.com` a la IP `164.90.145.189`.
+2. Configura el proxy y reglas según tus necesidades.
 
-### Paso 5: Verificar deploy
-Prueba estos endpoints (reemplaza con tu URL de Render):
+### Paso 6: Verificar deploy
+Prueba estos endpoints:
 ```bash
 # Healthcheck
-curl https://trebolsoft-api.onrender.com/health
+curl https://api.trebolsoft.com/health
 
 # Documentación
-https://trebolsoft-api.onrender.com/docs
+https://api.trebolsoft.com/docs
 ```
 
-### Paso 6: Dominio personalizado (opcional)
-1. En tu servicio de Render: **Settings** → **Custom Domains**
-2. Agregar: `api.trebolsoft.com`
-3. En tu proveedor de DNS (Namecheap, Cloudflare, etc.):
-   - Crear registro **CNAME**: `api` → `[tu-servicio].onrender.com`
-4. Esperar propagación DNS (5-30 minutos)
-
-> **Nota sobre plan Free**: El servicio se apaga tras 15 min de inactividad. La primera solicitud después tarda ~1 min en "despertar". Para producción real, considera upgrade a plan pago.
+### Paso 7: Seguridad y producción
+- Usa HTTPS (Cloudflare puede gestionar el certificado SSL).
+- Mantén actualizadas las dependencias y el sistema operativo.
+- Realiza backups periódicos de la base de datos y archivos importantes.
 
 ## 📁 Estructura del proyecto
 ```
