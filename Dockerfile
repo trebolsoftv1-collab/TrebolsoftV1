@@ -11,6 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 COPY .env /app/.env
+RUN cat /app/.env
 
 RUN chmod +x /app/entrypoint.sh
 
