@@ -1,3 +1,7 @@
+# Endpoint temporal para mostrar los orígenes permitidos de CORS
+@app.get("/cors-origins")
+def get_cors_origins():
+    return {"cors_allowed_origins": settings.cors_allowed_origins}
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
