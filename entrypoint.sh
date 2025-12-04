@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 set -e
-export $(grep -v '^#' /app/.env | xargs)
+set -a
+. /app/.env
+set +a
 export PORT="${PORT:-10000}"
 # Migraciones
 alembic upgrade head
