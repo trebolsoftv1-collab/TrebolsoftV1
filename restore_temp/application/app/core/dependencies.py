@@ -51,7 +51,7 @@ def get_current_active_admin(
     """
     Verifica que el usuario actual sea administrador.
     """
-    if current_user.role != "admin":
+    if current_user.role != "ADMIN":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
