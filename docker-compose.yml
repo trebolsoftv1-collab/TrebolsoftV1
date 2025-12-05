@@ -16,7 +16,7 @@ services:
     environment:
       APP_ENV: local
       APP_NAME: TrebolSoft API
-      DATABASE_URL: postgresql+psycopg2://trebolsoft:Porquesi2025@10.48.0.5:5432/trebolsoft
+      DATABASE_URL: postgresql+psycopg2://trebolsoft:Porquesi2025@db:5432/trebolsoft
       CORS_ALLOWED_ORIGINS: http://localhost:8000,http://localhost:3000
       # Cloudinary credentials (optional for local dev, use .env file or set here)
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
