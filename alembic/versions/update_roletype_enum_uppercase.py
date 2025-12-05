@@ -7,7 +7,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'update_roletype_enum_uppercase'
-down_revision = None
+down_revision = '0edabb2f41d7'
 branch_labels = None
 depends_on = None
 
@@ -21,7 +21,7 @@ def upgrade():
 
     # Step 3: Alter column to use new enum type (cast text)
     op.execute("ALTER TABLE users ALTER COLUMN role DROP DEFAULT;")
-    op.execute("ALTER TABLE users ALTER COLUMN role TYPE roletype USING UPPER(role)::text::roletype;")
+    op.execute("ALTER TABLE users ALTER COLUMN role TYPE roletype USING UPPER(role::text)::roletype;")
 
     # Step 4: Drop old enum type
     op.execute("DROP TYPE roletype_old;")
