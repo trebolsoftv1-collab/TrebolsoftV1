@@ -7,9 +7,9 @@ import enum
 from app.core.database import Base
 
 class RoleType(str, enum.Enum):
-    ADMIN = "admin"
-    SUPERVISOR = "supervisor"
-    COLLECTOR = "collector"
+    ADMIN = "ADMIN"
+    SUPERVISOR = "SUPERVISOR"
+    COLLECTOR = "COLLECTOR"
 
 class User(Base):
     __tablename__ = "users"
