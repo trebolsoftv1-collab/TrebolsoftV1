@@ -10,6 +10,7 @@ class ClientBase(BaseModel):
     phone: str  # Celular principal (requerido)
     phone2: Optional[str] = None  # Celular 2 (opcional)
     email: Optional[EmailStr] = None  # Email (opcional)
+    ocupacion: Optional[str] = None  # Ocupación u Oficio
     
     # Información de ubicación
     city: Optional[str] = None  # Ciudad (opcional - puede ser None en BD)

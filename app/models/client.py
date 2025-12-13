@@ -15,6 +15,7 @@ class Client(Base):
     phone = Column(String)  # Celular principal
     phone2 = Column(String, nullable=True)  # Celular 2 (opcional)
     email = Column(String, nullable=True)  # Email (opcional)
+    ocupacion = Column(String, nullable=True)  # Ocupación u Oficio
     
     # Información de ubicación
     city = Column(String)  # Ciudad

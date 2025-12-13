@@ -47,6 +47,7 @@ def create_client(db: Session, client: ClientCreate) -> Client:
         phone=client.phone,
         phone2=client.phone2,
         email=client.email,
+        ocupacion=getattr(client, 'ocupacion', None),
         city=client.city,
         address=client.address,
         latitude=client.latitude,
