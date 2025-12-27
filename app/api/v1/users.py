@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, get_current_active_admin, get_current_active_supervisor
 from app.models.user import User
-from app.schemas.user import User as UserSchema, UserCreate
+from app.schemas.user import User as UserSchema, UserCreate, UserUpdate
 from app.crud import user as crud_user
+from app.core.security import get_password_hash, verify_password
 
 router = APIRouter()
 
@@ -94,3 +95,28 @@ def read_user(
                 detail="Not enough permissions"
             )
         return db_user
+
+
+@router.patch("/me/password", response_model=UserSchema)
+def change_own_password(
+    current_password: str,
+    new_password: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Permite al usuario autenticado cambiar su propia contraseña."""
+    if not verify_password(current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La contraseña actual es incorrecta."
+        )
+    if not new_password or len(new_password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La nueva contraseña debe tener al menos 6 caracteres."
+        )
+    current_user.hashed_password = get_password_hash(new_password)
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
