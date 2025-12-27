@@ -20,9 +20,9 @@ def list_transactions(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.role == "admin":
+    if current_user.role == "ADMIN":
         return get_transactions(db, skip=skip, limit=limit, credit_id=credit_id)
-    elif current_user.role == "supervisor":
+    elif current_user.role == "SUPERVISOR":
         allowed_ids = get_subordinate_collector_ids(db, current_user.id) + [current_user.id]
         return get_transactions(db, skip=skip, limit=limit, credit_id=credit_id, user_ids=allowed_ids)
     else:
@@ -41,10 +41,10 @@ def create_new_transaction(
         if not credit:
             raise HTTPException(status_code=404, detail="Credit not found")
         credit_collector_id = credit.client.collector_id if credit.client else None
-        if current_user.role == "collector":
+        if current_user.role == "COLLECTOR":
             if credit_collector_id != current_user.id:
                 raise HTTPException(status_code=403, detail="Not enough permissions for this credit")
-        elif current_user.role == "supervisor":
+        elif current_user.role == "SUPERVISOR":
             allowed_ids = get_subordinate_collector_ids(db, current_user.id) + [current_user.id]
             if credit_collector_id not in allowed_ids:
                 raise HTTPException(status_code=403, detail="Not enough permissions for this credit")
@@ -62,9 +62,9 @@ def read_transaction(
     t = get_transaction(db, tx_id)
     if not t:
         raise HTTPException(status_code=404, detail="Transaction not found")
-    if current_user.role == "admin":
+    if current_user.role == "ADMIN":
         return t
-    if current_user.role == "supervisor":
+    if current_user.role == "SUPERVISOR":
         allowed_ids = get_subordinate_collector_ids(db, current_user.id) + [current_user.id]
         if t.user_id not in allowed_ids:
             raise HTTPException(status_code=403, detail="Not enough permissions")

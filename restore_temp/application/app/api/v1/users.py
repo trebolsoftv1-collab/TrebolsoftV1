@@ -20,11 +20,11 @@ def list_users(
 ):
     """Lista usuarios según permisos."""
     # Admin: ve todos
-    if current_user.role == "admin":
+    if current_user.role == "ADMIN":
         return crud_user.get_users(db, skip=skip, limit=limit)
     
     # Supervisor: ve solo sus cobradores
-    elif current_user.role == "supervisor":
+    elif current_user.role == "SUPERVISOR":
         all_users = crud_user.get_users(db, skip=0, limit=10000)
         subordinates = [u for u in all_users if u.supervisor_id == current_user.id]
         return subordinates[skip:skip+limit]
@@ -43,7 +43,7 @@ def admin_create_user(
     """Crea usuario con validación jerárquica."""
     # Solo admin puede crear usuarios
     # Validar: si crea supervisor/cobrador, puede asignar supervisor
-    if user.role == "admin" and user.supervisor_id is not None:
+    if user.role == "ADMIN" and user.supervisor_id is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Admin users cannot have a supervisor"
@@ -74,11 +74,11 @@ def read_user(
         )
     
     # Admin: acceso total
-    if current_user.role == "admin":
+    if current_user.role == "ADMIN":
         return db_user
     
     # Supervisor: ve sus subordinados
-    elif current_user.role == "supervisor":
+    elif current_user.role == "SUPERVISOR":
         if db_user.supervisor_id != current_user.id and db_user.id != current_user.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

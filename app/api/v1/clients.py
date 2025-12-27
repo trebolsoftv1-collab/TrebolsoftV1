@@ -174,7 +174,7 @@ async def upload_house_photo(
         )
     
     # Verificar permisos
-    if current_user.role == "collector" and db_client.collector_id != current_user.id:
+    if current_user.role == "COLLECTOR" and db_client.collector_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You can only upload photos for your own clients"

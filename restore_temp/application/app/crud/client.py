@@ -9,7 +9,7 @@ def get_subordinate_collector_ids(db: Session, supervisor_id: int) -> List[int]:
     """Obtiene IDs de todos los cobradores bajo un supervisor."""
     collectors = db.query(User.id).filter(
         User.supervisor_id == supervisor_id,
-        User.role == "collector",
+        User.role == "COLLECTOR",
         User.is_active == True
     ).all()
     return [c.id for c in collectors]
