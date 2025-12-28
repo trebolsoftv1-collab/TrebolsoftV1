@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.api.dependencies import get_current_user
+from app.core.dependencies import get_current_user
 from app.core.cloudinary import upload_client_photo
 from app.models.user import User, RoleType
 from app.schemas.client import Client, ClientCreate, ClientUpdate
