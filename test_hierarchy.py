@@ -203,6 +203,20 @@ def main():
     print("\n👁️  Cobrador 1 ve solo sus clientes:")
     list_clients(collector1_token, "cobrador1")
     
+    # 11. Verificación de Reglas de Asignación
+    print("\n📋 PASO 11: Verificación de Reglas de Asignación (Lógica esperada)")
+    print("-" * 50)
+    print("   👉 COBRADOR: Al crear, el backend debe ignorar 'collector_id' enviado y forzar el ID del usuario actual.")
+    print("      Resultado: Cliente asignado a Cobrador 1 automáticamente.")
+    
+    print("\n   👉 SUPERVISOR: Debe enviar 'collector_id'. El backend debe validar que ese cobrador sea su subordinado.")
+    print("      UI: Debe mostrar dropdown solo con sus cobradores.")
+    
+    print("\n   👉 ADMIN: Debe enviar 'collector_id'. Puede elegir cualquier cobrador del sistema.")
+    print("      UI: Debe mostrar selector de Supervisor (filtro) y luego selector de Cobrador.")
+    print("-" * 50)
+
+    
     print("\n" + "=" * 60)
     print("✅ TEST COMPLETADO")
     print("=" * 60)
