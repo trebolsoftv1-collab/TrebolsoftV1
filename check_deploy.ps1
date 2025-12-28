@@ -54,8 +54,30 @@ $body = "username=trebolsoft&password=$adminPassword"
 try {
     $response = Invoke-WebRequest -Uri "https://api.trebolsoft.com/api/v1/auth/token" -Method POST -ContentType "application/x-www-form-urlencoded" -Body $body -UseBasicParsing
     Write-Host "   ✅ Login funcionando correctamente" -ForegroundColor Green
+    
+    # Guardar token para pruebas de módulos
+    $token = ($response.Content | ConvertFrom-Json).access_token
 } catch {
     Write-Host "   ❌ Login falló: $($_.Exception.Message)" -ForegroundColor Red
+    exit
+}
+
+# Test 5: Verificar Módulos
+Write-Host "`n5️⃣ Verificando Módulos Principales..."
+$headers = @{ "Authorization" = "Bearer $token" }
+$modules = @{
+    "Clientes" = "api/v1/clients/"
+    "Créditos" = "api/v1/credits/"
+    "Transacciones" = "api/v1/transactions/"
+}
+
+foreach ($name in $modules.Keys) {
+    try {
+        $res = Invoke-WebRequest -Uri "https://api.trebolsoft.com/$($modules[$name])" -Headers $headers -UseBasicParsing
+        Write-Host "   ✅ $name: OK (Status 200)" -ForegroundColor Green
+    } catch {
+        Write-Host "   ❌ $name: FALLÓ ($($_.Exception.Response.StatusCode))" -ForegroundColor Red
+    }
 }
 
 Write-Host "`n" + ("=" * 60)
