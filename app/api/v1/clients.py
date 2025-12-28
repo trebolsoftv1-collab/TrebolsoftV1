@@ -23,7 +23,7 @@ def list_clients(
 ):
     """Lista todos los clientes con filtros opcionales."""
     # Admin: ve todo
-    if current_user.role == "ADMIN":
+    if current_user.role == RoleType.ADMIN:
         return crud_client.get_clients(
             db,
             skip=skip,
@@ -33,7 +33,7 @@ def list_clients(
         )
     
     # Supervisor: ve clientes de sus cobradores + sus propios clientes
-    elif current_user.role == "SUPERVISOR":
+    elif current_user.role == RoleType.SUPERVISOR:
         subordinate_ids = crud_client.get_subordinate_collector_ids(db, current_user.id)
         # Incluye al supervisor mismo (puede tener clientes propios)
         allowed_ids = subordinate_ids + [current_user.id]
@@ -68,16 +68,16 @@ def create_new_client(
     """Crea un nuevo cliente. Acceso para Admin, Supervisor y Cobrador."""
     
     # Lógica de asignación automática y validación por rol
-    if current_user.role == "COLLECTOR":
+    if current_user.role == RoleType.COLLECTOR:
         client.collector_id = current_user.id
-    elif current_user.role == "SUPERVISOR":
+    elif current_user.role == RoleType.SUPERVISOR:
         if not client.collector_id:
             raise HTTPException(status_code=400, detail="Debe asignar un cobrador")
         # Validar que el cobrador sea subordinado
         subordinate_ids = crud_client.get_subordinate_collector_ids(db, current_user.id)
         if client.collector_id not in subordinate_ids:
             raise HTTPException(status_code=400, detail="El cobrador no pertenece a su equipo")
-    elif current_user.role == "ADMIN":
+    elif current_user.role == RoleType.ADMIN:
         if not client.collector_id:
             raise HTTPException(status_code=400, detail="Debe asignar un cobrador")
 
@@ -107,11 +107,11 @@ def read_client(
         )
     
     # Admin: acceso total
-    if current_user.role == "ADMIN":
+    if current_user.role == RoleType.ADMIN:
         return db_client
     
     # Supervisor: ve clientes de sus cobradores + propios
-    elif current_user.role == "SUPERVISOR":
+    elif current_user.role == RoleType.SUPERVISOR:
         subordinate_ids = crud_client.get_subordinate_collector_ids(db, current_user.id)
         allowed_ids = subordinate_ids + [current_user.id]
         
@@ -144,7 +144,7 @@ def update_existing_client(
     db_client = read_client(client_id=client_id, db=db, current_user=current_user)
 
     # Solo Admin y Supervisor pueden actualizar
-    if current_user.role not in ["ADMIN", "SUPERVISOR"]:
+    if current_user.role not in [RoleType.ADMIN, RoleType.SUPERVISOR]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to update this client."
@@ -170,7 +170,7 @@ def remove_client(
     db_client = read_client(client_id=client_id, db=db, current_user=current_user)
 
     # Solo Admin y Supervisor pueden eliminar
-    if current_user.role not in ["ADMIN", "SUPERVISOR"]:
+    if current_user.role not in [RoleType.ADMIN, RoleType.SUPERVISOR]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to delete this client."
@@ -209,7 +209,7 @@ async def upload_house_photo(
         )
     
     # Verificar permisos
-    if current_user.role == "COLLECTOR" and db_client.collector_id != current_user.id:
+    if current_user.role == RoleType.COLLECTOR and db_client.collector_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You can only upload photos for your own clients"
