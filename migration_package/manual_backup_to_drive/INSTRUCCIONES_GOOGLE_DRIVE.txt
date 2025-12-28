@@ -33,7 +33,7 @@ TrebolSoft-Backups/
 
 🔄 PARA RESTAURAR:
 1. Descargar .zip desde Google Drive
-2. Copiar a: C:\Users\jpancha\TrebolsoftV1/backups/
+2. Copiar a: [TU_CARPETA_DEL_PROYECTO]/backups/
 3. Ejecutar: python restore_system.py
 4. Seguir instrucciones en pantalla
 
