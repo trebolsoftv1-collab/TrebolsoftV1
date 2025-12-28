@@ -137,9 +137,19 @@ def update_existing_client(
     client_id: int,
     client: ClientUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_admin)
+    current_user: User = Depends(get_current_user)
 ):
     """Actualiza un cliente. Requiere rol supervisor o admin."""
+    # Reutilizamos la lógica de read_client para verificar permisos de acceso primero
+    db_client = read_client(client_id=client_id, db=db, current_user=current_user)
+
+    # Solo Admin y Supervisor pueden actualizar
+    if current_user.role not in ["ADMIN", "SUPERVISOR"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to update this client."
+        )
+
     updated = crud_client.update_client(db, client_id, client)
     if not updated:
         raise HTTPException(
@@ -153,9 +163,19 @@ def update_existing_client(
 def remove_client(
     client_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_admin)
+    current_user: User = Depends(get_current_user)
 ):
     """Desactiva un cliente (soft delete). Requiere rol supervisor o admin."""
+    # Reutilizamos la lógica de read_client para verificar permisos de acceso primero
+    db_client = read_client(client_id=client_id, db=db, current_user=current_user)
+
+    # Solo Admin y Supervisor pueden eliminar
+    if current_user.role not in ["ADMIN", "SUPERVISOR"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to delete this client."
+        )
+
     ok = crud_client.delete_client(db, client_id)
     if not ok:
         raise HTTPException(
