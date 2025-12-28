@@ -63,9 +63,24 @@ def list_clients(
 def create_new_client(
     client: ClientCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_admin)
+    current_user: User = Depends(get_current_user)
 ):
-    """Crea un nuevo cliente. Requiere rol supervisor o admin."""
+    """Crea un nuevo cliente. Acceso para Admin, Supervisor y Cobrador."""
+    
+    # Lógica de asignación automática y validación por rol
+    if current_user.role == "COLLECTOR":
+        client.collector_id = current_user.id
+    elif current_user.role == "SUPERVISOR":
+        if not client.collector_id:
+            raise HTTPException(status_code=400, detail="Debe asignar un cobrador")
+        # Validar que el cobrador sea subordinado
+        subordinate_ids = crud_client.get_subordinate_collector_ids(db, current_user.id)
+        if client.collector_id not in subordinate_ids:
+            raise HTTPException(status_code=400, detail="El cobrador no pertenece a su equipo")
+    elif current_user.role == "ADMIN":
+        if not client.collector_id:
+            raise HTTPException(status_code=400, detail="Debe asignar un cobrador")
+
     # Verificar si ya existe un cliente con ese DNI
     existing = crud_client.get_client_by_dni(db, client.dni)
     if existing:
