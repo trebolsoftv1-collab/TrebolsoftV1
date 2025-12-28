@@ -12,6 +12,12 @@ from app.core.security import get_password_hash, verify_password
 router = APIRouter()
 
 
+@router.get("/me", response_model=UserSchema)
+def read_user_me(current_user: User = Depends(get_current_user)):
+    """Obtiene el perfil del usuario autenticado actual."""
+    return current_user
+
+
 @router.get("/", response_model=List[UserSchema])
 def list_users(
     skip: int = 0,
@@ -58,12 +64,6 @@ def admin_create_user(
                 detail="Invalid supervisor_id"
             )
     return crud_user.create_user(db, user)
-
-
-@router.get("/me", response_model=UserSchema)
-def read_user_me(current_user: User = Depends(get_current_user)):
-    """Obtiene el perfil del usuario autenticado actual."""
-    return current_user
 
 
 @router.get("/{user_id}", response_model=UserSchema)

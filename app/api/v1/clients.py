@@ -23,7 +23,7 @@ def list_clients(
 ):
     """Lista todos los clientes con filtros opcionales."""
     # Admin: ve todo
-    if current_user.role == RoleType.ADMIN:
+    if current_user.role == "ADMIN":
         return crud_client.get_clients(
             db,
             skip=skip,
@@ -33,7 +33,7 @@ def list_clients(
         )
     
     # Supervisor: ve clientes de sus cobradores + sus propios clientes
-    elif current_user.role == RoleType.SUPERVISOR:
+    elif current_user.role == "SUPERVISOR":
         subordinate_ids = crud_client.get_subordinate_collector_ids(db, current_user.id)
         # Incluye al supervisor mismo (puede tener clientes propios)
         allowed_ids = subordinate_ids + [current_user.id]
