@@ -60,6 +60,12 @@ def admin_create_user(
     return crud_user.create_user(db, user)
 
 
+@router.get("/me", response_model=UserSchema)
+def read_user_me(current_user: User = Depends(get_current_user)):
+    """Obtiene el perfil del usuario autenticado actual."""
+    return current_user
+
+
 @router.get("/{user_id}", response_model=UserSchema)
 def read_user(
     user_id: int,

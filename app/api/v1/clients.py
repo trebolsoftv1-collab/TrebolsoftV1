@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.api.dependencies import get_current_user
 from app.core.cloudinary import upload_client_photo
-from app.models.user import User
+from app.models.user import User, RoleType
 from app.schemas.client import Client, ClientCreate, ClientUpdate
 from app.crud import client as crud_client
 
@@ -23,7 +23,7 @@ def list_clients(
 ):
     """Lista todos los clientes con filtros opcionales."""
     # Admin: ve todo
-    if current_user.role == "ADMIN":
+    if current_user.role == RoleType.ADMIN:
         return crud_client.get_clients(
             db,
             skip=skip,
@@ -33,7 +33,7 @@ def list_clients(
         )
     
     # Supervisor: ve clientes de sus cobradores + sus propios clientes
-    elif current_user.role == "SUPERVISOR":
+    elif current_user.role == RoleType.SUPERVISOR:
         subordinate_ids = crud_client.get_subordinate_collector_ids(db, current_user.id)
         # Incluye al supervisor mismo (puede tener clientes propios)
         allowed_ids = subordinate_ids + [current_user.id]
