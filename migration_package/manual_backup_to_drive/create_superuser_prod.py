@@ -2,7 +2,8 @@ import sys
 import os
 
 # Aseguramos que el directorio raiz del proyecto este en el path
-sys.path.append(os.getcwd())
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, project_root)
 
 from app.db.session import SessionLocal
 from app.models.user import User
