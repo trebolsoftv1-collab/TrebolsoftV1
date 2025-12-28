@@ -47,7 +47,7 @@ try {
 
 # Test 4: Login (debe seguir funcionando)
 Write-Host "`n4️⃣ Verificando que login siga funcionando..."
-$body = "username=admin&password=Admin123!"
+$body = "username=trebolsoft&password=Admin123!"
 try {
     $response = Invoke-WebRequest -Uri "https://api.trebolsoft.com/api/v1/auth/token" -Method POST -ContentType "application/x-www-form-urlencoded" -Body $body -UseBasicParsing
     Write-Host "   ✅ Login funcionando correctamente" -ForegroundColor Green
