@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, get_current_active_supervisor, get_current_active_admin
-from app.models.user import User
+from app.models.user import User, RoleType
 from app.models.credit import CreditStatus
 from app.schemas.credit import Credit, CreditCreate, CreditUpdate
 from app.crud.credit import get_credit, get_credits, create_credit, update_credit, delete_credit
@@ -22,9 +22,9 @@ def list_credits(
     current_user: User = Depends(get_current_user)
 ):
     """Lista créditos con visibilidad según rol."""
-    if current_user.role == "ADMIN":
+    if current_user.role == RoleType.ADMIN:
         return get_credits(db, skip=skip, limit=limit, client_id=client_id, status=status)
-    elif current_user.role == "SUPERVISOR":
+    elif current_user.role == RoleType.SUPERVISOR:
         allowed_ids = get_subordinate_collector_ids(db, current_user.id) + [current_user.id]
         return get_credits(
             db,
@@ -52,7 +52,7 @@ def create_new_credit(
 ):
     """Crea un nuevo crédito (solo admin/supervisor)."""
     # Validar que el cliente pertenezca a un collector permitido
-    if current_user.role != "ADMIN":
+    if current_user.role != RoleType.ADMIN:
         cli = crud_get_client(db, credit.client_id)
         if not cli:
             raise HTTPException(status_code=404, detail="Client not found")
@@ -71,10 +71,10 @@ def read_credit(
     if not c:
         raise HTTPException(status_code=404, detail="Credit not found")
     # Permisos por jerarquía
-    if current_user.role == "ADMIN":
+    if current_user.role == RoleType.ADMIN:
         return c
     collector_id = c.client.collector_id if c.client else None
-    if current_user.role == "SUPERVISOR":
+    if current_user.role == RoleType.SUPERVISOR:
         allowed_ids = get_subordinate_collector_ids(db, current_user.id) + [current_user.id]
         if collector_id not in allowed_ids:
             raise HTTPException(status_code=403, detail="Not enough permissions")

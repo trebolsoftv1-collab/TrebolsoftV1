@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, get_current_active_admin, get_current_active_supervisor
-from app.models.user import User
+from app.models.user import User, RoleType
 from app.schemas.user import User as UserSchema, UserCreate, UserUpdate
 from app.crud import user as crud_user
 from app.core.security import get_password_hash, verify_password
@@ -27,11 +27,11 @@ def list_users(
 ):
     """Lista usuarios según permisos."""
     # Admin: ve todos
-    if current_user.role == "ADMIN":
+    if current_user.role == RoleType.ADMIN:
         return crud_user.get_users(db, skip=skip, limit=limit)
     
     # Supervisor: ve solo sus cobradores
-    elif current_user.role == "SUPERVISOR":
+    elif current_user.role == RoleType.SUPERVISOR:
         all_users = crud_user.get_users(db, skip=0, limit=10000)
         subordinates = [u for u in all_users if u.supervisor_id == current_user.id]
         return subordinates[skip:skip+limit]
@@ -50,7 +50,7 @@ def admin_create_user(
     """Crea usuario con validación jerárquica."""
     # Solo admin puede crear usuarios
     # Validar: si crea supervisor/cobrador, puede asignar supervisor
-    if user.role == "ADMIN" and user.supervisor_id is not None:
+    if user.role == RoleType.ADMIN and user.supervisor_id is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Admin users cannot have a supervisor"
@@ -58,7 +58,7 @@ def admin_create_user(
     # Verificar que el supervisor existe
     if user.supervisor_id is not None:
         supervisor = crud_user.get_user(db, user.supervisor_id)
-        if not supervisor or supervisor.role not in ["ADMIN", "SUPERVISOR"]:
+        if not supervisor or supervisor.role not in [RoleType.ADMIN, RoleType.SUPERVISOR]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid supervisor_id"
@@ -81,11 +81,11 @@ def read_user(
         )
     
     # Admin: acceso total
-    if current_user.role == "ADMIN":
+    if current_user.role == RoleType.ADMIN:
         return db_user
     
     # Supervisor: ve sus subordinados
-    elif current_user.role == "SUPERVISOR":
+    elif current_user.role == RoleType.SUPERVISOR:
         if db_user.supervisor_id != current_user.id and db_user.id != current_user.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
