@@ -1,42 +1,15 @@
 import sys
 import os
 
-# --- CONFIGURACIÓN DE RUTA ---
-current_script_path = os.path.abspath(__file__)
-script_dir = os.path.dirname(current_script_path)
-# Subimos 2 niveles en este caso (migration_package/manual_backup_to_drive)
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_script_path)))
+# Aseguramos que el directorio raiz del proyecto este en el path
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, project_root)
 
-print(f"📂 Raíz del proyecto: {project_root}")
-
-# --- DIAGNÓSTICO DE ERRORES COMUNES ---
-# 1. Verificar si existe un archivo app.py que cause conflicto
-conflict_file = os.path.join(project_root, "app.py")
-if os.path.exists(conflict_file):
-    print("\n⚠️  ¡CONFLICTO DETECTADO!")
-    print(f"   Existe un archivo '{conflict_file}' que impide importar la carpeta 'app'.")
-    print("   👉 SOLUCIÓN: Renombra ese archivo a 'main.py' o 'run.py' en el servidor.")
-    print("      Comando sugerido: mv app.py main.py")
-    sys.exit(1)
-
-# 2. Verificar estructura básica
-if not os.path.isdir(os.path.join(project_root, "app")):
-    print(f"\n❌ Error: No se encuentra la carpeta 'app' en {project_root}")
-    print("   Contenido actual:", os.listdir(project_root))
-    sys.exit(1)
-
-try:
-    from app.db.session import SessionLocal
-    from app.models.user import User
-    from app.core.security import get_password_hash
-except ImportError as e:
-    print(f"\n❌ Error de importación: {e}")
-    print("   Verifica que exista 'app/db/__init__.py' y 'app/db/session.py'")
-    sys.exit(1)
+from app.db.session import SessionLocal
+from app.models.user import User
+from app.core.security import get_password_hash
 
 def create_admin():
-    print("🔄 Conectando a la base de datos...")
     db = SessionLocal()
     try:
         # 1. Buscar si el usuario ya existe
@@ -60,10 +33,10 @@ def create_admin():
             db.add(user)
         
         db.commit()
-        print("🚀 ¡ÉXITO! Usuario administrador configurado correctamente en DigitalOcean.")
+        print("✅ ¡ÉXITO! Usuario administrador configurado correctamente en DigitalOcean.")
         
     except Exception as e:
-        print(f"❌ Error en base de datos: {e}")
+        print(f"❌ Error: {e}")
     finally:
         db.close()
 
