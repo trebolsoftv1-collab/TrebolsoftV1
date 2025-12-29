@@ -23,6 +23,7 @@ def upgrade() -> None:
     # Agregar campos phone2 y city a la tabla clients
     op.add_column('clients', sa.Column('phone2', sa.String(), nullable=True))
     op.add_column('clients', sa.Column('city', sa.String(), nullable=True))
+    op.add_column('clients', sa.Column('ocupacion', sa.String(), nullable=True))
 
 
 def downgrade() -> None:
