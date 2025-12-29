@@ -1,6 +1,7 @@
 from typing import Optional, List
+from datetime import date
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from app.models.cash_transaction import CashTransaction, TransactionType
 from app.models.credit import Credit, CreditStatus
 from app.schemas.transaction import TransactionCreate
@@ -17,6 +18,8 @@ def get_transactions(
     *,
     user_ids: Optional[List[int]] = None,
     credit_id: Optional[int] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
 ) -> list[CashTransaction]:
     query = db.query(CashTransaction)
     if user_ids is not None:
@@ -25,6 +28,10 @@ def get_transactions(
         query = query.filter(CashTransaction.user_id.in_(user_ids))
     if credit_id is not None:
         query = query.filter(CashTransaction.credit_id == credit_id)
+    if start_date:
+        query = query.filter(func.date(CashTransaction.created_at) >= start_date)
+    if end_date:
+        query = query.filter(func.date(CashTransaction.created_at) <= end_date)
     return query.order_by(CashTransaction.created_at.desc()).offset(skip).limit(limit).all()
 
 

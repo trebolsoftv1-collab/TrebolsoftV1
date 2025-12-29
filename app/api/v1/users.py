@@ -33,7 +33,13 @@ def list_users(
     # Supervisor: ve solo sus cobradores
     elif current_user.role == RoleType.SUPERVISOR:
         all_users = crud_user.get_users(db, skip=0, limit=10000)
-        subordinates = [u for u in all_users if u.supervisor_id == current_user.id]
+        
+        # Buscar usuarios por nombre escrito en assigned_routes (separado por comas)
+        assigned_names = []
+        if getattr(current_user, "assigned_routes", None):
+            assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
+            
+        subordinates = [u for u in all_users if u.supervisor_id == current_user.id or u.username in assigned_names]
         return subordinates[skip:skip+limit]
     
     # Cobrador: solo se ve a sí mismo
@@ -86,7 +92,12 @@ def read_user(
     
     # Supervisor: ve sus subordinados
     elif current_user.role == RoleType.SUPERVISOR:
-        if db_user.supervisor_id != current_user.id and db_user.id != current_user.id:
+        # Verificar si el nombre del usuario está asignado
+        assigned_names = []
+        if getattr(current_user, "assigned_routes", None):
+            assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
+            
+        if db_user.supervisor_id != current_user.id and db_user.id != current_user.id and db_user.username not in assigned_names:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not enough permissions"
@@ -111,6 +122,13 @@ def change_own_password(
     current_user: User = Depends(get_current_user)
 ):
     """Permite al usuario autenticado cambiar su propia contraseña."""
+    # Restricción: Los cobradores no pueden cambiar su contraseña
+    if current_user.role == RoleType.COLLECTOR:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Los cobradores no tienen permiso para cambiar su contraseña. Contacte a su supervisor."
+        )
+
     if not verify_password(current_password, current_user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

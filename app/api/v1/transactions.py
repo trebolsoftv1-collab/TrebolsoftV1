@@ -1,4 +1,5 @@
 from typing import List, Optional
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -17,16 +18,24 @@ def list_transactions(
     skip: int = 0,
     limit: int = 100,
     credit_id: Optional[int] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     if current_user.role == RoleType.ADMIN:
-        return get_transactions(db, skip=skip, limit=limit, credit_id=credit_id)
+        return get_transactions(db, skip=skip, limit=limit, credit_id=credit_id, start_date=start_date, end_date=end_date)
     elif current_user.role == RoleType.SUPERVISOR:
         allowed_ids = get_subordinate_collector_ids(db, current_user.id) + [current_user.id]
-        return get_transactions(db, skip=skip, limit=limit, credit_id=credit_id, user_ids=allowed_ids)
+        # Agregar IDs por nombre de usuario en assigned_routes
+        if getattr(current_user, "assigned_routes", None):
+            assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
+            if assigned_names:
+                extra_users = db.query(User.id).filter(User.username.in_(assigned_names)).all()
+                allowed_ids.extend([u.id for u in extra_users])
+        return get_transactions(db, skip=skip, limit=limit, credit_id=credit_id, user_ids=allowed_ids, start_date=start_date, end_date=end_date)
     else:
-        return get_transactions(db, skip=skip, limit=limit, credit_id=credit_id, user_ids=[current_user.id])
+        return get_transactions(db, skip=skip, limit=limit, credit_id=credit_id, user_ids=[current_user.id], start_date=start_date, end_date=end_date)
 
 @router.post("/", response_model=Transaction, status_code=status.HTTP_201_CREATED)
 def create_new_transaction(
@@ -46,6 +55,12 @@ def create_new_transaction(
                 raise HTTPException(status_code=403, detail="Not enough permissions for this credit")
         elif current_user.role == RoleType.SUPERVISOR:
             allowed_ids = get_subordinate_collector_ids(db, current_user.id) + [current_user.id]
+            # Agregar IDs por nombre de usuario
+            if getattr(current_user, "assigned_routes", None):
+                assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
+                if assigned_names:
+                    extra_users = db.query(User.id).filter(User.username.in_(assigned_names)).all()
+                    allowed_ids.extend([u.id for u in extra_users])
             if credit_collector_id not in allowed_ids:
                 raise HTTPException(status_code=403, detail="Not enough permissions for this credit")
     try:
@@ -66,6 +81,12 @@ def read_transaction(
         return t
     if current_user.role == RoleType.SUPERVISOR:
         allowed_ids = get_subordinate_collector_ids(db, current_user.id) + [current_user.id]
+        # Agregar IDs por nombre de usuario
+        if getattr(current_user, "assigned_routes", None):
+            assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
+            if assigned_names:
+                extra_users = db.query(User.id).filter(User.username.in_(assigned_names)).all()
+                allowed_ids.extend([u.id for u in extra_users])
         if t.user_id not in allowed_ids:
             raise HTTPException(status_code=403, detail="Not enough permissions")
         return t

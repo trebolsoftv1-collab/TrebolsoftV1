@@ -28,16 +28,33 @@ app = FastAPI(
 )
 
 # Configurar CORS
+# Aseguramos que los orígenes sean una lista válida y agregamos defaults de desarrollo si es necesario
+origins = settings.cors_allowed_origins
+if isinstance(origins, str):
+    origins = [origin.strip() for origin in origins.split(",")]
+
+# Si la lista está vacía (posible error de configuración), agregamos localhost por defecto para evitar bloqueos
+if not origins:
+    origins = [
+        "https://trebolsoft.com",
+        "https://www.trebolsoft.com",
+        "http://trebolsoft.com",
+        "http://www.trebolsoft.com",
+        "http://164.90.145.189",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://localhost:8000"
+    ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_allowed_origins,
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-print("CORS_ALLOWED_ORIGINS:", settings.cors_allowed_origins)
+print("CORS_ALLOWED_ORIGINS (Active):", origins)
 
 # Endpoints
 @app.get("/")
@@ -57,8 +74,8 @@ def health_check():
 
 # Endpoint temporal de setup - ELIMINAR después de usar
 class SetupAdmin(BaseModel):
-    username: str = "admin"
-    password: str = "Admin123!"
+    username: str = "trebolsoft"
+    password: str = "Porquesi2025"
     email: str = "admin@trebolsoft.com"
     full_name: str = "Administrador"
 

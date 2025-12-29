@@ -6,10 +6,49 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.cloudinary import upload_client_photo
 from app.models.user import User, RoleType
+from app.models.client import Client as ClientModel
 from app.schemas.client import Client, ClientCreate, ClientUpdate
 from app.crud import client as crud_client
 
 router = APIRouter()
+
+
+@router.get("/count", response_model=dict)
+def count_clients(
+    is_active: Optional[bool] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Devuelve la cantidad total de clientes visibles para el usuario."""
+    query = db.query(ClientModel)
+    
+    if is_active is not None:
+        query = query.filter(ClientModel.is_active == is_active)
+
+    # Admin: ve todo
+    if current_user.role == RoleType.ADMIN:
+        return {"total": query.count()}
+    
+    # Supervisor: ve clientes de sus cobradores + asignados + propios
+    elif current_user.role == RoleType.SUPERVISOR:
+        subordinate_ids = crud_client.get_subordinate_collector_ids(db, current_user.id)
+        
+        # Agregar IDs de usuarios asignados por nombre en assigned_routes
+        if getattr(current_user, "assigned_routes", None):
+            assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
+            if assigned_names:
+                extra_users = db.query(User.id).filter(User.username.in_(assigned_names)).all()
+                subordinate_ids.extend([u.id for u in extra_users])
+                
+        allowed_ids = subordinate_ids + [current_user.id]
+        
+        count = query.filter(ClientModel.collector_id.in_(allowed_ids)).count()
+        return {"total": count}
+    
+    # Cobrador: solo sus propios clientes
+    else:
+        count = query.filter(ClientModel.collector_id == current_user.id).count()
+        return {"total": count}
 
 
 @router.get("/", response_model=List[Client])
@@ -36,6 +75,14 @@ def list_clients(
     elif current_user.role == RoleType.SUPERVISOR:
         subordinate_ids = crud_client.get_subordinate_collector_ids(db, current_user.id)
         # Incluye al supervisor mismo (puede tener clientes propios)
+        
+        # Agregar IDs de usuarios asignados por nombre en assigned_routes
+        if getattr(current_user, "assigned_routes", None):
+            assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
+            if assigned_names:
+                extra_users = db.query(User.id).filter(User.username.in_(assigned_names)).all()
+                subordinate_ids.extend([u.id for u in extra_users])
+                
         allowed_ids = subordinate_ids + [current_user.id]
         
         clients = crud_client.get_clients(
@@ -75,7 +122,15 @@ def create_new_client(
             raise HTTPException(status_code=400, detail="Debe asignar un cobrador")
         # Validar que el cobrador sea subordinado
         subordinate_ids = crud_client.get_subordinate_collector_ids(db, current_user.id)
-        if client.collector_id not in subordinate_ids:
+        
+        # Agregar IDs de usuarios asignados por nombre
+        if getattr(current_user, "assigned_routes", None):
+            assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
+            if assigned_names:
+                extra_users = db.query(User.id).filter(User.username.in_(assigned_names)).all()
+                subordinate_ids.extend([u.id for u in extra_users])
+
+        if client.collector_id != current_user.id and client.collector_id not in subordinate_ids:
             raise HTTPException(status_code=400, detail="El cobrador no pertenece a su equipo")
     elif current_user.role == RoleType.ADMIN:
         if not client.collector_id:
@@ -113,6 +168,14 @@ def read_client(
     # Supervisor: ve clientes de sus cobradores + propios
     elif current_user.role == RoleType.SUPERVISOR:
         subordinate_ids = crud_client.get_subordinate_collector_ids(db, current_user.id)
+        
+        # Agregar IDs de usuarios asignados por nombre
+        if getattr(current_user, "assigned_routes", None):
+            assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
+            if assigned_names:
+                extra_users = db.query(User.id).filter(User.username.in_(assigned_names)).all()
+                subordinate_ids.extend([u.id for u in extra_users])
+                
         allowed_ids = subordinate_ids + [current_user.id]
         
         if db_client.collector_id not in allowed_ids:
@@ -169,11 +232,11 @@ def remove_client(
     # Reutilizamos la lógica de read_client para verificar permisos de acceso primero
     db_client = read_client(client_id=client_id, db=db, current_user=current_user)
 
-    # Solo Admin y Supervisor pueden eliminar
-    if current_user.role not in [RoleType.ADMIN, RoleType.SUPERVISOR]:
+    # Solo Admin puede eliminar (Supervisor solo puede editar)
+    if current_user.role != RoleType.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to delete this client."
+            detail="Solo el administrador puede eliminar clientes."
         )
 
     ok = crud_client.delete_client(db, client_id)

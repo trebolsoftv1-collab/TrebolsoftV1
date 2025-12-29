@@ -26,6 +26,12 @@ def list_credits(
         return get_credits(db, skip=skip, limit=limit, client_id=client_id, status=status)
     elif current_user.role == RoleType.SUPERVISOR:
         allowed_ids = get_subordinate_collector_ids(db, current_user.id) + [current_user.id]
+        # Agregar IDs por nombre de usuario en assigned_routes
+        if getattr(current_user, "assigned_routes", None):
+            assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
+            if assigned_names:
+                extra_users = db.query(User.id).filter(User.username.in_(assigned_names)).all()
+                allowed_ids.extend([u.id for u in extra_users])
         return get_credits(
             db,
             skip=skip,
@@ -57,6 +63,12 @@ def create_new_credit(
         if not cli:
             raise HTTPException(status_code=404, detail="Client not found")
         allowed_ids = get_subordinate_collector_ids(db, current_user.id) + [current_user.id]
+        # Agregar IDs por nombre de usuario
+        if getattr(current_user, "assigned_routes", None):
+            assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
+            if assigned_names:
+                extra_users = db.query(User.id).filter(User.username.in_(assigned_names)).all()
+                allowed_ids.extend([u.id for u in extra_users])
         if cli.collector_id not in allowed_ids:
             raise HTTPException(status_code=403, detail="Not enough permissions for client's collector")
     return create_credit(db, credit)
@@ -76,6 +88,12 @@ def read_credit(
     collector_id = c.client.collector_id if c.client else None
     if current_user.role == RoleType.SUPERVISOR:
         allowed_ids = get_subordinate_collector_ids(db, current_user.id) + [current_user.id]
+        # Agregar IDs por nombre de usuario
+        if getattr(current_user, "assigned_routes", None):
+            assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
+            if assigned_names:
+                extra_users = db.query(User.id).filter(User.username.in_(assigned_names)).all()
+                allowed_ids.extend([u.id for u in extra_users])
         if collector_id not in allowed_ids:
             raise HTTPException(status_code=403, detail="Not enough permissions")
         return c
