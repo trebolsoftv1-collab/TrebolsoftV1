@@ -1,9 +1,8 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from app.models.user import RoleType
 
 class UserBase(BaseModel):
-    email: EmailStr
     username: str
     full_name: str
     phone: Optional[str] = None
@@ -15,7 +14,6 @@ class UserCreate(UserBase):
     supervisor_id: Optional[int] = None
 
 class UserUpdate(BaseModel):
-    email: Optional[EmailStr] = None
     full_name: Optional[str] = None
     phone: Optional[str] = None
     zone: Optional[str] = None

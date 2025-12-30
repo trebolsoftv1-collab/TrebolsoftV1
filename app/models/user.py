@@ -15,11 +15,11 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
+    # email eliminado
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     full_name = Column(String)
-    phone = Column(String, nullable=True)  # Nuevo campo para celular
+    phone = Column(String, nullable=True)  # Campo para celular, sin restricción unique
     zone = Column(String, nullable=True)   # Nuevo campo para zona asignada
     role = Column(Enum(RoleType))
     is_active = Column(Boolean, default=True)

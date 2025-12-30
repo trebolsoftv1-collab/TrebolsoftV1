@@ -111,7 +111,6 @@ def test_credit_with_insurance_and_payments():
         base_url,
         admin_token,
         {
-            "email": f"sup_{suf}@example.com",
             "username": f"sup_{suf}",
             "full_name": f"Supervisor {suf}",
             "role": "supervisor",
@@ -126,7 +125,6 @@ def test_credit_with_insurance_and_payments():
         base_url,
         sup_token,
         {
-            "email": f"col_{suf}@example.com",
             "username": f"col_{suf}",
             "full_name": f"Collector {suf}",
             "role": "collector",

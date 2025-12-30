@@ -13,7 +13,6 @@ def unique_username():
 def test_register_login_and_get_user():
     username = unique_username()
     payload = {
-        "email": f"{username}@example.com",
         "username": username,
         "full_name": "Test User",
         "role": "collector",

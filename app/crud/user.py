@@ -8,8 +8,7 @@ from app.schemas.user import UserCreate
 def get_user(db: Session, user_id: int) -> Optional[User]:
     return db.query(User).filter(User.id == user_id).first()
 
-def get_user_by_email(db: Session, email: str) -> Optional[User]:
-    return db.query(User).filter(User.email == email).first()
+
 
 def get_user_by_username(db: Session, username: str) -> Optional[User]:
     return db.query(User).filter(User.username == username).first()
@@ -21,10 +20,8 @@ def get_users(
 ) -> list[User]:
     return db.query(User).offset(skip).limit(limit).all()
 
-def create_user(db: Session, user: UserCreate) -> User:
     hashed_password = get_password_hash(user.password)
     db_user = User(
-        email=user.email,
         username=user.username,
         hashed_password=hashed_password,
         full_name=user.full_name,
