@@ -10,8 +10,12 @@ engine = create_engine(settings.database_url)
 # Crear la clase de sesión
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 # Base para los modelos
 Base = declarative_base()
+
+# Importar todos los modelos para que Alembic los detecte
+from app.models import *
 
 
 def get_db():
