@@ -30,3 +30,4 @@ class BoxMovement(Base):
     performed_by_id = Column(Integer, ForeignKey("users.id"))
 
     box = relationship("Box", back_populates="movements")
+
