@@ -18,8 +18,10 @@ def get_users(
     skip: int = 0,
     limit: int = 100
 ) -> list[User]:
+
     return db.query(User).offset(skip).limit(limit).all()
 
+def create_user(db: Session, user: UserCreate) -> User:
     hashed_password = get_password_hash(user.password)
     db_user = User(
         username=user.username,
