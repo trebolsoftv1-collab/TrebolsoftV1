@@ -28,6 +28,7 @@ class Client(Base):
     
     # Sistema
     is_active = Column(Boolean, default=True)
+    estado = Column(String, default="activo")  # Puede ser 'activo', 'volado', 'recuperado'
     collector_id = Column(Integer, ForeignKey("users.id"))
     
     created_at = Column(DateTime, default=datetime.utcnow)

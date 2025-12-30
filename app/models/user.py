@@ -34,6 +34,7 @@ class User(Base):
                                       remote_side=[id],
                                       foreign_keys=[supervisor_id])
     cash_transactions = relationship("CashTransaction", back_populates="user")
+    cajas = relationship("Caja", back_populates="user")
 
     def __repr__(self):
         return f"<User {self.username}>"

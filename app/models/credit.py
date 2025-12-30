@@ -32,6 +32,7 @@ class Credit(Base):
     # Relaciones
     client = relationship("Client", back_populates="credits")
     payments = relationship("CashTransaction", back_populates="credit")
+    caja_movimientos = relationship("CajaMovimiento", back_populates="credito")
 
     def __repr__(self):
         return f"<Credit {self.id} - Client {self.client_id}>"

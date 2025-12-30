@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from app.core import settings
 from app.core.database import Base, engine, SessionLocal
-from app.api.v1 import items_router, users_router, clients_router, credits_router, transactions_router
+from app.api.v1 import items_router, users_router, clients_router, credits_router, transactions_router, caja_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.stats import router as stats_router
 from app.models.user import User, RoleType
@@ -121,6 +121,7 @@ app.include_router(clients_router, prefix="/api/v1/clients", tags=["clients"])
 app.include_router(credits_router, prefix="/api/v1/credits", tags=["credits"])
 app.include_router(transactions_router, prefix="/api/v1/transactions", tags=["transactions"])
 app.include_router(stats_router, prefix="/api/v1/stats", tags=["stats"])
+app.include_router(caja_router, prefix="/api/v1")
 
 # Endpoint temporal para mostrar los orígenes permitidos de CORS
 @app.get("/cors-origins")
