@@ -7,6 +7,7 @@ from app.core.dependencies import get_current_user, get_current_active_admin, ge
 from app.models.user import User, RoleType
 from app.schemas.user import User as UserSchema, UserCreate, UserUpdate
 from app.crud import user as crud_user
+from app.crud import box as crud_box
 from app.core.security import get_password_hash, verify_password
 
 router = APIRouter()
@@ -69,7 +70,10 @@ def admin_create_user(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid supervisor_id"
             )
-    return crud_user.create_user(db, user)
+    
+    new_user = crud_user.create_user(db, user)
+    crud_box.create_box(db, new_user.id)
+    return new_user
 
 
 @router.get("/{user_id}", response_model=UserSchema)
