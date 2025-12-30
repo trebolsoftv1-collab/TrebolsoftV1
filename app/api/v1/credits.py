@@ -8,6 +8,7 @@ from app.models.user import User, RoleType
 from app.models.credit import CreditStatus
 from app.schemas.credit import Credit, CreditCreate, CreditUpdate
 from app.crud.credit import get_credit, get_credits, create_credit, update_credit, delete_credit
+from app.crud import box as crud_box
 from app.crud.client import get_subordinate_collector_ids, get_client as crud_get_client
 
 router = APIRouter()
@@ -57,11 +58,13 @@ def create_new_credit(
     current_user: User = Depends(get_current_active_admin)
 ):
     """Crea un nuevo crédito (solo admin/supervisor)."""
+    # 1. Obtener el cliente primero para saber quién es su cobrador
+    cli = crud_get_client(db, credit.client_id)
+    if not cli:
+        raise HTTPException(status_code=404, detail="Client not found")
+
     # Validar que el cliente pertenezca a un collector permitido
     if current_user.role != RoleType.ADMIN:
-        cli = crud_get_client(db, credit.client_id)
-        if not cli:
-            raise HTTPException(status_code=404, detail="Client not found")
         allowed_ids = get_subordinate_collector_ids(db, current_user.id) + [current_user.id]
         # Agregar IDs por nombre de usuario
         if getattr(current_user, "assigned_routes", None):
@@ -71,6 +74,30 @@ def create_new_credit(
                 allowed_ids.extend([u.id for u in extra_users])
         if cli.collector_id not in allowed_ids:
             raise HTTPException(status_code=403, detail="Not enough permissions for client's collector")
+
+    # --- INTEGRACIÓN CAJA: Descontar dinero del cobrador ---
+    if not cli.collector_id:
+        raise HTTPException(status_code=400, detail="El cliente no tiene un cobrador asignado para descontar el dinero.")
+
+    # Buscamos la caja del cobrador dueño del cliente (cli.collector_id)
+    collector_box = crud_box.get_box_by_user_id(db, cli.collector_id)
+    if not collector_box:
+        raise HTTPException(status_code=404, detail=f"No se encontró la caja del cobrador (ID: {cli.collector_id})")
+
+    # Validamos fondos suficientes
+    if collector_box.base_balance < credit.amount:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Fondos insuficientes en la caja del cobrador. Disponible: {collector_box.base_balance:,.2f}"
+        )
+
+    # Ejecutamos el descuento y registramos el movimiento
+    crud_box.update_box_balance(db, collector_box, -credit.amount)
+    crud_box.create_movement(
+        db, collector_box.id, -credit.amount, "LOAN_DISBURSEMENT", current_user.id, f"Desembolso crédito a {cli.full_name}"
+    )
+    # -------------------------------------------------------
+
     return create_credit(db, credit)
 
 @router.get("/{credit_id}", response_model=Credit)

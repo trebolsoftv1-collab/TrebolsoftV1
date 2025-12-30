@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, computed_field
+from pydantic import BaseModel, computed_field
 from typing import Optional
 
 class ClientBase(BaseModel):
@@ -9,7 +9,6 @@ class ClientBase(BaseModel):
     # Información de contacto
     phone: str  # Celular principal (requerido)
     phone2: Optional[str] = None  # Celular 2 (opcional)
-    email: Optional[EmailStr] = None  # Email (opcional)
     ocupacion: Optional[str] = None  # Ocupación u Oficio
     
     # Información de ubicación
@@ -28,7 +27,6 @@ class ClientUpdate(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
     phone2: Optional[str] = None
-    email: Optional[EmailStr] = None
     city: Optional[str] = None
     address: Optional[str] = None
     collector_id: Optional[int] = None
