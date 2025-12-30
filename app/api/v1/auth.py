@@ -10,7 +10,7 @@ from app.core.security import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     Token
 )
-from app.crud.user import authenticate_user, create_user, get_user_by_username, get_user_by_email
+from app.crud.user import authenticate_user, create_user, get_user_by_username
 from app.schemas.user import User, UserCreate
 from app.models.user import User as UserModel
 

@@ -23,7 +23,7 @@ def create_admin():
     try:
         print("\n=== Crear usuario ===")
         username = input("Nombre de usuario: ").strip()
-        email = input("Email: ").strip()
+        #email = input("Email: ").strip()
         full_name = input("Nombre completo: ").strip()
         phone = input("Teléfono: ").strip()
         zone = input("Zona: ").strip()
@@ -47,7 +47,7 @@ def create_admin():
 
         user_data = {
             "username": username,
-            "email": email,
+           # "email": email,
             "full_name": full_name,
             "phone": phone,
             "zone": zone,
@@ -68,7 +68,7 @@ def create_admin():
         print(f"\n📋 Credenciales de acceso:")
         print(f"   Username: {new_user.username}")
         print(f"   Password: {password}")
-        print(f"   Email: {new_user.email}")
+        #print(f"   Email: {new_user.email}")
         print(f"   Role: {new_user.role}")
         print(f"\n⚠️  IMPORTANTE: Cambia la contraseña después del primer login")
         print(f"\n🌐 Puedes usar estas credenciales en:")
