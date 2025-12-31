@@ -7,7 +7,7 @@ import enum
 from app.core.database import Base
 
 class CreditStatus(str, enum.Enum):
-    ACTIVE = "active"
+    active = "active"
     COMPLETED = "completed"
     DEFAULTED = "defaulted"
 
@@ -23,12 +23,14 @@ class Credit(Base):
     daily_payment = Column(Float)  # Pago diario calculado
     total_amount = Column(Float)   # Monto total a pagar
     remaining_amount = Column(Float) # Monto restante por pagar
-    status = Column(Enum(CreditStatus), default=CreditStatus.ACTIVE)
+    status = Column(Enum(CreditStatus), default=CreditStatus.active)
     start_date = Column(DateTime, default=datetime.utcnow)
     end_date = Column(DateTime)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+        # Cambio automático forzado por sincronización (Copilot 2025-12-31)
+    # Cambio automático forzado por sincronización (Copilot 2025-12-31)
     # Relaciones
     client = relationship("Client", back_populates="credits")
     payments = relationship("CashTransaction", back_populates="credit")

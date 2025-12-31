@@ -32,9 +32,10 @@ def get_stats(db, start_date=None, end_date=None, user_ids=None):
     # Totales de clientes y créditos (estos suelen ser totales históricos, no por rango de fecha, salvo creación)
     # Solo contamos clientes ACTIVOS para que el número sea real
     total_clientes = client_query.filter(Client.is_active == True).count()
-    active_credits = credit_query.filter(Credit.status == CreditStatus.ACTIVE).count()
+    active_credits = credit_query.filter(Credit.status == CreditStatus.active).count()
     completed_credits = credit_query.filter(Credit.status == CreditStatus.COMPLETED).count()
 
+        # Cambio automático forzado por sincronización (Copilot 2025-12-31)
     return {
         "total_cobranzas": total_transacciones,
         "total_clientes": total_clientes,
