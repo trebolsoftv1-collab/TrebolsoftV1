@@ -69,14 +69,28 @@ $modules = @{
     "Clientes" = "api/v1/clients/"
     "Créditos" = "api/v1/credits/"
     "Transacciones" = "api/v1/transactions/"
+    "Cajas (Ruta English)" = "api/v1/boxes/"
+    "Cajas (Ruta Español)" = "api/v1/cajas/"
 }
 
 foreach ($name in $modules.Keys) {
     try {
-        $res = Invoke-WebRequest -Uri "https://api.trebolsoft.com/$($modules[$name])" -Headers $headers -UseBasicParsing
-        Write-Host "   ✅ $name: OK (Status 200)" -ForegroundColor Green
+        # Usamos ErrorAction Stop para capturar 404s o 500s
+        $res = Invoke-WebRequest -Uri "https://api.trebolsoft.com/$($modules[$name])" -Headers $headers -UseBasicParsing -ErrorAction Stop
+        
+        # Si responde 200 o 405 (Method Not Allowed, significa que la ruta existe pero pide POST/GET específico), es éxito
+        Write-Host "   ✅ $name: DISPONIBLE" -ForegroundColor Green
     } catch {
-        Write-Host "   ❌ $name: FALLÓ ($($_.Exception.Response.StatusCode))" -ForegroundColor Red
+        $statusCode = $_.Exception.Response.StatusCode
+        if ($statusCode -eq 404) {
+             if ($name -like "*Cajas*") {
+                Write-Host "   🔸 $name: No encontrado (Probablemente usaste la otra ruta)" -ForegroundColor DarkGray
+             } else {
+                Write-Host "   ❌ $name: NO ENCONTRADO (404) - ¿El archivo está en TrebolsoftV1?" -ForegroundColor Red
+             }
+        } else {
+             Write-Host "   ❌ $name: FALLÓ ($statusCode)" -ForegroundColor Red
+        }
     }
 }
 
