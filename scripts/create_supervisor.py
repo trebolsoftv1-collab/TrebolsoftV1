@@ -1,8 +1,4 @@
-from app.core.database import SessionLocal
-from app.core.security import get_password_hash
-from app.models.user import RoleType
-from app.crud.user import create_user
-from app.schemas.user import UserCreate
+# sync-forced-2025
 """
 Script para crear usuario administrador, supervisor o collector en TrebolSoft
 Usar este script cuando no puedes hacer login porque no hay usuarios.

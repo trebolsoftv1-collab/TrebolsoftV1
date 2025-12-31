@@ -1,3 +1,4 @@
+# sync-forced-2025
 # Ejecuta el test E2E contra una API en vivo.
 # Requisitos: pytest y requests instalados en el venv.
 

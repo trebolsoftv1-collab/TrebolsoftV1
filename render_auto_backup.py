@@ -1,3 +1,4 @@
+# sync-forced-2025
 """
 🤖 Sistema de Backup Automático para Render
 Este script se ejecuta EN EL SERVIDOR de Render para hacer backups automáticos

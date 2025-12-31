@@ -1,3 +1,4 @@
+# sync-forced-2025
 """
 E2E: Valida jerarquía y flujo de créditos con seguro y pagos.
 

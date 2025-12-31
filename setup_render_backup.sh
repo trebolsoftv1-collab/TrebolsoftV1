@@ -1,3 +1,4 @@
+# sync-forced-2025
 #!/bin/bash
 # 🤖 Configurador de Backup Automático para Render
 # Este script configura un backup automático que se ejecuta en el servidor

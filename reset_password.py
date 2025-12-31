@@ -1,3 +1,4 @@
+# sync-forced-2025
 """
 Script para resetear la contraseña de un usuario existente
 """

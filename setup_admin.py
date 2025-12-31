@@ -1,3 +1,4 @@
+# sync-forced-2025
 """
 Script de setup inicial - Ejecutar manualmente para crear admin
 """

@@ -1,3 +1,4 @@
+# sync-forced-2025
 """Script para probar la jerarquía de usuarios y permisos."""
 import requests
 import json

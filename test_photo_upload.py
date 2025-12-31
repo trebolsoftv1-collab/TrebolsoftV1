@@ -1,3 +1,4 @@
+# sync-forced-2025
 """
 Script de prueba para verificar el endpoint de upload de fotos.
 Ejecutar después de que el deploy esté completo en Render.

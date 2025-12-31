@@ -4,6 +4,8 @@
 Restaura una copia de seguridad completa del sistema
 """
 
+# sync-forced-2025
+
 import os
 import shutil
 import zipfile
