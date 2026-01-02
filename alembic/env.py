@@ -28,8 +28,25 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
+# from app.core.database import Base
+# target_metadata = Base.metadata
+
+# --- INICIO DE LA CONFIGURACIÓN PARA AUTOGENERATE ---
+# Importar la Base de SQLAlchemy desde nuestra aplicación
 from app.core.database import Base
+
+# Importar todos los modelos para que Alembic los reconozca
+from app.models.user import User
+from app.models.client import Client
+from app.models.credit import Credit
+from app.models.payment import Payment
+from app.models.cash_transaction import CashTransaction
+from app.models.box import Box, BoxMovement
+
+# Asignar la metadata de nuestros modelos a Alembic
 target_metadata = Base.metadata
+# --- FIN DE LA CONFIGURACIÓN PARA AUTOGENERATE ---
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

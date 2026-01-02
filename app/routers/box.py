@@ -1,61 +1,64 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
-from app.models.user import User, RoleType
-from app.schemas.box import Box as BoxSchema, BoxMovementCreate, BoxUpdate, CashCount, BoxCloseResponse, BoxMovement
-from app.crud import box as crud_box
-from app.crud import user as crud_user
+from app.models.user import User as UserModel
+from app.models.cash_transaction import TransactionType
+from app.schemas.caja import Saldo as SaldoSchema, CashTransactionCreate, CashTransactionBase
+from app.crud import crud_caja
 
 router = APIRouter()
 
-@router.get("/{user_id}", response_model=BoxSchema)
-def get_user_box(
-    user_id: int,
+@router.get("/saldo", response_model=SaldoSchema)
+def get_saldo_caja(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: UserModel = Depends(get_current_user)
 ):
-    """Obtiene la caja de un usuario especfico con validacin de permisos."""
-    target_box = crud_box.get_box_by_user_id(db, user_id)
-    if not target_box:
-        raise HTTPException(status_code=404, detail="Box not found for this user")
+    """
+    Obtiene el saldo de caja actual para el usuario autenticado.
+    """
+    saldo = crud_caja.get_user_balance(db, user_id=current_user.id)
+    return {"saldo": saldo}
 
-    # Permisos
-    if current_user.role == RoleType.ADMIN:
-        pass # Admin ve todo
-    elif current_user.role == RoleType.SUPERVISOR:
-        # Supervisor ve la suya y la de sus subordinados
-        target_user = crud_user.get_user(db, user_id)
-        if target_user.id != current_user.id and target_user.supervisor_id != current_user.id:
-             raise HTTPException(status_code=403, detail="Not authorized to view this box")
-    else:
-        # Cobrador solo ve la suya
-        if current_user.id != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized")
-            
-    return target_box
-
-@router.get("/{user_id}/history", response_model=List[BoxMovement])
-def get_box_history(
-    user_id: int,
+@router.get("/movimientos", response_model=List[CashTransactionBase])
+def get_movimientos_caja(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: UserModel = Depends(get_current_user)
 ):
-    """Obtiene el historial de movimientos de la caja de un usuario."""
-    target_box = crud_box.get_box_by_user_id(db, user_id)
-    if not target_box:
-        raise HTTPException(status_code=404, detail="Box not found for this user")
+    """
+    Obtiene una lista de movimientos de caja para el usuario autenticado.
+    """
+    movimientos = crud_caja.get_cash_transactions_by_user(db, user_id=current_user.id, skip=skip, limit=limit)
+    return movimientos
 
-    # Permisos (Misma lgica que ver la caja)
-    if current_user.role == RoleType.ADMIN:
-        pass
-    elif current_user.role == RoleType.SUPERVISOR:
-        target_user = crud_user.get_user(db, user_id)
-        if target_user.id != current_user.id and target_user.supervisor_id != current_user.id:
-             raise HTTPException(status_code=403, detail="Not authorized to view this box")
-    else:
-        # ...continúa el código...
+@router.post("/movimientos", response_model=CashTransactionBase)
+def create_nuevo_movimiento_caja(
+    transaction: CashTransactionCreate,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    Crea un nuevo movimiento de caja (ingreso, egreso, etc.).
+    """
+    # Validar que el tipo de transacción sea válido usando el Enum del modelo
+    valid_transaction_types = [item.value for item in TransactionType]
+    if transaction.type not in valid_transaction_types:
+        raise HTTPException(status_code=400, detail=f"Tipo de transacción no válido. Tipos permitidos: {valid_transaction_types}")
+
+    # Si es un retiro o desembolso, verificar que haya saldo suficiente
+    if transaction.type in [TransactionType.WITHDRAWAL.value, TransactionType.DISBURSEMENT.value]:
+        current_balance = crud_caja.get_user_balance(db, user_id=current_user.id)
+        if current_balance < transaction.amount:
+            raise HTTPException(status_code=400, detail="Saldo insuficiente para realizar la operación.")
+
+    new_transaction = crud_caja.create_cash_transaction(db=db, transaction_data=transaction, user_id=current_user.id)
+    
+    if not new_transaction:
+        raise HTTPException(status_code=400, detail="Error al crear la transacción.")
+
+    return new_transaction
+
