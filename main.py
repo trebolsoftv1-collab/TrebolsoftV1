@@ -41,7 +41,7 @@ app.add_middleware(
 
 # --- Inclusión de Routers en la Aplicación ---
 # Se incluyen todas las rutas de la API con un prefijo común /api/v1
-app.include_router(auth.router, prefix="/api/v1", tags=["Autenticación"])
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Autenticación"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["Usuarios"])
 app.include_router(clients.router, prefix="/api/v1/clients", tags=["Clientes"])
 app.include_router(caja.router, prefix="/api/v1/caja", tags=["Caja"])
