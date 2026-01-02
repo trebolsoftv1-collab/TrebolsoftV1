@@ -39,7 +39,7 @@ from app.core.database import Base
 from app.models.user import User
 from app.models.client import Client
 from app.models.credit import Credit
-from app.models.payment import Payment
+#from app.models.payment import Payment
 from app.models.cash_transaction import CashTransaction
 from app.models.box import Box, BoxMovement
 
