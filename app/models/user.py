@@ -33,7 +33,8 @@ class User(Base):
                                       backref="supervisor",
                                       remote_side=[id],
                                       foreign_keys=[supervisor_id],
-                                      cascade="all, delete-orphan")
+                                      cascade="all, delete-orphan",
+                                      single_parent=True)
     cash_transactions = relationship("CashTransaction", back_populates="user", cascade="all, delete-orphan")
     cajas = relationship("Caja", back_populates="user", cascade="all, delete-orphan")
 
