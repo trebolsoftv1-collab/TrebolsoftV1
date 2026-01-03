@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Enum, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 import enum
 
 from app.core.database import Base
@@ -29,12 +29,20 @@ class User(Base):
 
     # Relaciones
     assigned_clients = relationship("Client", back_populates="collector", cascade="all, delete-orphan")
-    supervised_collectors = relationship("User", 
-                                      backref="supervisor",
-                                      remote_side=[id],
-                                      foreign_keys=[supervisor_id],
-                                      cascade="all, delete-orphan",
-                                      single_parent=True)
+    supervised_collectors = relationship(
+        "User",
+        backref=backref(
+            "supervisor",
+            remote_side=[id],
+            foreign_keys=[User.supervisor_id],
+            cascade="all, delete-orphan",
+            single_parent=True
+        ),
+        remote_side=[id],
+        foreign_keys=[supervisor_id],
+        cascade="all, delete-orphan",
+        single_parent=True
+    )
     cash_transactions = relationship("CashTransaction", back_populates="user", cascade="all, delete-orphan")
     cajas = relationship("Caja", back_populates="user", cascade="all, delete-orphan")
 
