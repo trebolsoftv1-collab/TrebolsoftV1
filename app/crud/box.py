@@ -12,6 +12,10 @@ def get_box_by_user_id(db: Session, user_id: int) -> Caja:
         db.commit()
         db.refresh(box)
     return box
+
+# Alias para compatibilidad con el endpoint de creación de usuario
+def create_box(db: Session, user_id: int) -> Caja:
+    return get_box_by_user_id(db, user_id)
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session

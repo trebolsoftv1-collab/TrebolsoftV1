@@ -28,13 +28,14 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relaciones
-    assigned_clients = relationship("Client", back_populates="collector")
+    assigned_clients = relationship("Client", back_populates="collector", cascade="all, delete-orphan")
     supervised_collectors = relationship("User", 
                                       backref="supervisor",
                                       remote_side=[id],
-                                      foreign_keys=[supervisor_id])
-    cash_transactions = relationship("CashTransaction", back_populates="user")
-    cajas = relationship("Caja", back_populates="user")
+                                      foreign_keys=[supervisor_id],
+                                      cascade="all, delete-orphan")
+    cash_transactions = relationship("CashTransaction", back_populates="user", cascade="all, delete-orphan")
+    cajas = relationship("Caja", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User {self.username}>"
