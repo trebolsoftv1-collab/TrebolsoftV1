@@ -18,7 +18,13 @@ Key workflows (examples and exact commands)
   - `docker compose up --build`
   - API is exposed at `localhost:10000` (container port 10000 → host 10000). DB on `localhost:5432`.
 
-- Entrypoint / deploy note: `entrypoint.sh` runs `alembic upgrade head` before starting `uvicorn`. Production deploys (Render via `render.yaml`) rely on this migration step.
+- Production deploy (DigitalOcean):
+  - Server IP: 164.90.145.189
+  - User: trebolsoft
+  - Path: /home/trebolsoft/TrebolsoftV1
+  - `entrypoint.sh` runs `alembic upgrade head` before starting `uvicorn`
+  - Nginx proxy: trebolsoft.com/api/* → http://127.0.0.1:10000
+  - SSL: Let's Encrypt via Certbot
 
 Important integration details and conventions
 

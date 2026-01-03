@@ -1,16 +1,11 @@
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
 from app.core import settings
-from app.core.database import Base, engine, SessionLocal
 from app.api.v1 import items_router, users_router, clients_router, credits_router, transactions_router
 from app.api.v1.box import router as caja_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.stats import router as stats_router
-from app.models.user import User, RoleType
-from app.core.security import get_password_hash
 
 # Nota: La creación de tablas la maneja Alembic vía migraciones en el arranque
 # (ver entrypoint.sh que ejecuta `alembic upgrade head`). Evitamos `create_all`
@@ -73,43 +68,6 @@ def health_check():
     """Endpoint de healthcheck."""
     return {"status": "ok"}
 
-# Endpoint temporal de setup - ELIMINAR después de usar
-class SetupAdmin(BaseModel):
-    username: str = "trebolsoft"
-    password: str = "Porquesi2025"
-    full_name: str = "Administrador"
-
-@app.post("/setup-admin")
-def setup_admin(data: SetupAdmin):
-    """Endpoint temporal para crear/actualizar admin"""
-    db = SessionLocal()
-    try:
-        # Verificar si ya existe
-        existing = db.query(User).filter(User.username == data.username).first()
-        if existing:
-            # Actualizar contraseña del admin existente
-            existing.hashed_password = get_password_hash(data.password)
-            existing.full_name = data.full_name
-            existing.is_active = True
-            db.commit()
-            return {"message": "Admin password updated successfully", "username": data.username}
-        
-        # Crear admin nuevo
-        admin = User(
-            username=data.username,
-            full_name=data.full_name,
-            phone="0000000000",
-            zone="Todas",
-            role=RoleType.ADMIN,
-            is_active=True,
-            hashed_password=get_password_hash(data.password)
-        )
-        db.add(admin)
-        db.commit()
-        return {"message": "Admin created successfully", "username": data.username}
-    finally:
-        db.close()
-
 # Incluir rutas de la API v1
 app.include_router(items_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["authentication"])
@@ -120,8 +78,3 @@ app.include_router(credits_router, prefix="/api/v1/credits", tags=["credits"])
 app.include_router(transactions_router, prefix="/api/v1/transactions", tags=["transactions"])
 app.include_router(stats_router, prefix="/api/v1/stats", tags=["stats"])
 app.include_router(caja_router, prefix="/api/v1/box", tags=["box"])
-
-# Endpoint temporal para mostrar los orígenes permitidos de CORS
-@app.get("/cors-origins")
-def get_cors_origins():
-    return {"cors_allowed_origins": settings.cors_allowed_origins}
