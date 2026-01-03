@@ -34,7 +34,6 @@ class User(Base):
         backref=backref(
             "supervisor",
             remote_side=[id],
-            foreign_keys=["supervisor_id"],
             cascade="all, delete-orphan",
             single_parent=True
         ),
