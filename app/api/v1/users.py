@@ -1,19 +1,3 @@
-# Endpoint DELETE para eliminar usuario
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(
-    user_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_admin)
-):
-    """Elimina un usuario por ID. Solo admin."""
-    db_user = crud_user.get_user(db, user_id)
-    if not db_user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    db.delete(db_user)
-    db.commit()
-    return None
-
-
 
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -28,6 +12,21 @@ from app.crud import box as crud_box
 from app.core.security import get_password_hash, verify_password
 
 router = APIRouter()
+
+# Endpoint DELETE para eliminar usuario
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_admin)
+):
+    """Elimina un usuario por ID. Solo admin."""
+    db_user = crud_user.get_user(db, user_id)
+    if not db_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    db.delete(db_user)
+    db.commit()
+    return None
 
 
 @router.get("/me", response_model=UserSchema)
