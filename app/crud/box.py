@@ -1,3 +1,5 @@
+
+from sqlalchemy.orm import Session
 from app.models.caja import Caja, CajaTipo
 
 # Busca la caja de un usuario. Si no existe, la crea y la retorna.
