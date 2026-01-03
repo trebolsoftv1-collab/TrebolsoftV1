@@ -29,18 +29,13 @@ class User(Base):
 
     # Relaciones
     assigned_clients = relationship("Client", back_populates="collector", cascade="all, delete-orphan")
-    supervised_collectors = relationship(
+    supervisor = relationship(
         "User",
-        backref=backref(
-            "supervisor",
-            remote_side=[id],
-            cascade="all, delete-orphan",
-            single_parent=True
-        ),
         remote_side=[id],
-        foreign_keys=[supervisor_id],
-        cascade="all, delete-orphan",
-        single_parent=True
+        backref=backref(
+            "supervised_collectors",
+            cascade="all, delete-orphan"
+        )
     )
     cash_transactions = relationship("CashTransaction", back_populates="user", cascade="all, delete-orphan")
     cajas = relationship("Caja", back_populates="user", cascade="all, delete-orphan")
