@@ -34,26 +34,11 @@ def get_stats(
             # Si admin filtra por supervisor, calculamos el alcance de ese supervisor
             subordinates = crud_client.get_subordinate_collector_ids(db, supervisor_id)
             target_user_ids = subordinates + [supervisor_id]
-            
-            # Buscar rutas asignadas de ese supervisor
-            supervisor_obj = db.query(User).filter(User.id == supervisor_id).first()
-            if supervisor_obj and getattr(supervisor_obj, "assigned_routes", None):
-                assigned_names = [name.strip() for name in supervisor_obj.assigned_routes.split(',') if name.strip()]
-                if assigned_names:
-                    extra_users = db.query(User.id).filter(User.username.in_(assigned_names)).all()
-                    target_user_ids.extend([u.id for u in extra_users])
     
     elif current_user.role == RoleType.SUPERVISOR:
-        # Supervisor ve: Subordinados + Rutas Asignadas + Él mismo
+        # Supervisor ve: Subordinados + Él mismo
         subordinates = crud_client.get_subordinate_collector_ids(db, current_user.id)
         allowed_ids = subordinates + [current_user.id]
-        
-        # Agregar IDs por nombre de usuario en assigned_routes
-        if getattr(current_user, "assigned_routes", None):
-            assigned_names = [name.strip() for name in current_user.assigned_routes.split(',') if name.strip()]
-            if assigned_names:
-                extra_users = db.query(User.id).filter(User.username.in_(assigned_names)).all()
-                allowed_ids.extend([u.id for u in extra_users])
         
         # Si pide un usuario específico, validar que esté en su lista permitida
         if user_id:
