@@ -1,3 +1,15 @@
+from app.models.caja import Caja, CajaTipo
+
+# Busca la caja de un usuario. Si no existe, la crea y la retorna.
+def get_box_by_user_id(db: Session, user_id: int) -> Caja:
+    box = db.query(Caja).filter(Caja.user_id == user_id, Caja.tipo == CajaTipo.PRINCIPAL).first()
+    if not box:
+        # Crear caja principal si no existe
+        box = Caja(user_id=user_id, tipo=CajaTipo.PRINCIPAL, saldo=0.0)
+        db.add(box)
+        db.commit()
+        db.refresh(box)
+    return box
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
