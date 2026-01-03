@@ -75,7 +75,7 @@ def update_credit(db: Session, credit_id: int, payload: CreditUpdate | dict) -> 
         db_credit.remaining_amount = remaining
         # Actualizar estado si queda en cero
         if remaining == 0:
-            db_credit.status = CreditStatus.COMPLETED
+            db_credit.status = CreditStatus.completed
     if "status" in data and data["status"] is not None:
         db_credit.status = data["status"]
     db.commit()

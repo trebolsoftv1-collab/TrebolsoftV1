@@ -8,8 +8,8 @@ from app.core.database import Base
 
 class CreditStatus(str, enum.Enum):
     active = "active"
-    COMPLETED = "completed"
-    DEFAULTED = "defaulted"
+    completed = "completed"
+    defaulted = "defaulted"
 
 class Credit(Base):
     __tablename__ = "credits"

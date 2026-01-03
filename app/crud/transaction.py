@@ -66,7 +66,7 @@ def create_transaction(db: Session, user_id: int, tx: TransactionCreate) -> Cash
         if credit:
             credit.remaining_amount = max(0.0, (credit.remaining_amount or 0.0) - tx.amount)
             if credit.remaining_amount == 0.0:
-                credit.status = CreditStatus.COMPLETED
+                credit.status = CreditStatus.completed
 
     db.commit()
     db.refresh(db_tx)
